@@ -12,20 +12,22 @@
 #include "libft/libft.h"
 
 
-// typedef struct s_vars
-// {
-// 	void			*content;
-// 	struct s_vars	*next;
-// }					t_vars;
-
+typedef struct s_vars
+{
+	t_list	*env;
+	char	*line;
+	char	*word;
+	char	**arg_arr;
+	char	**path_arr;
+}			t_vars;
 
 void	arr_free(char **arg_arr)
 {
 	int	i;
 
 	i = 0;
-	while (arg_arr && arg_arr[i++])
-		free(arg_arr[i - 1]);
+	while (arg_arr && arg_arr[i])
+		free(arg_arr[i++]);
 	free(arg_arr);
 }
 
@@ -34,10 +36,9 @@ int len(char *str)
 	int	l;
 
 	l = 0;
-	if (str)
-		while(str[l])
-			l++;
-	return l;
+	while(str && str[l])
+		l++;
+	return (l);
 }
 
 int	arr_len(char **arr)
@@ -48,55 +49,7 @@ int	arr_len(char **arr)
 	if (arr)
 		while(arr[l])
 			l++;
-	return l;
-}
-
-//#############################################
-
-static char	*extend_str(char *s1, char c)
-{
-	char	*ss;
-	size_t	i;
-
-	ss = malloc(len(s1) + 2);
-	if (!ss)
-		return (NULL);
-	i = 0;
-	if (s1)
-	{
-		while (s1[i])
-		{
-			ss[i] = s1[i];
-			i++;
-		}
-	}
-	free(s1);
-	ss[i++] = c;
-	ss[i] = '\0';
-	return (ss);
-}
-
-char	*ms_join(char *s1, char *s2)
-{
-	char	*ss;
-	ssize_t	i;
-	ssize_t	j;
-
-	ss = malloc(len(s1) + len(s2) + 1);
-	if (!ss)
-		return (NULL);
-	i = 0;
-	if (s1 && (i-- || 1))
-		while (s1[++i])
-			ss[i] = s1[i];
-	if (s1)
-		free(s1);
-	j = 0;
-	if (s2)
-		while (s2[j] && s2[j] != '\n')
-			ss[i++] = s2[j++];
-	ss[i] = '\0';
-	return (ss);
+	return (l);
 }
 
 int	ftpf_putnbr(int n, int i)
@@ -125,7 +78,7 @@ void ft_putstr(char *str)
 
 	i = 0;
 	if (!str)
-		return;
+		return ;
 	while(str && str[i])
 	{
 		write(1, &str[i], 1);
@@ -134,43 +87,10 @@ void ft_putstr(char *str)
 	write(1, "\n", 1);
 }
 
-int has_new_line(char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str && str[i])
-		if (str[i++] == '\n')
-			return (1);
-	return (0);
-}
-
-char	*input_reader()
-{
-	char	*buff;
-	char	*str;
-	int		rb;
-	
-	buff = malloc(6);
-	buff[0] = '\0';
-	str = ms_join(NULL, NULL);
-	while(buff && !has_new_line(buff))
-	{
-		rb = read(0, buff, 5);
-		buff[rb] = '\0';
-		str = ms_join(str, buff);
-	}
-	free(buff);
-	return (str);
-}
-
-//#############################################
-
 char	*ms_cpy(char *s1)
 {
 	char	*ss;
 	int		i;
-	int		j;
 
 	ss = malloc(len(s1) + 1);
 	if (!ss)
@@ -182,7 +102,6 @@ char	*ms_cpy(char *s1)
 	if (s1 && len(s1) > 0)
 		i--;
 	ss[i] = '\0';
-	printf("i is : %d\n", i);
 	return (ss);
 }
 
@@ -195,21 +114,19 @@ char	*extend_arg(char *word, char c)
 	if (!new_word)
 		return (NULL);
 	i = 0;
-	if (word)
-	{
-		while (word[i])
-		{
-			new_word[i] = word[i];
-			i++;
-		}
-	}
-	// while (word && word[i])
+	// if (word)
 	// {
-	// 	new_word[i] = word[i];
-	// 	i++;
+	// 	while (word[i])
+	// 	{
+	// 		new_word[i] = word[i];
+	// 		i++;
+	// 	}
 	// }
-	// while (word && word[i++])
-	// 	new_word[i - 1] = word[i - 1];  // might have leaks
+	while (word && word[i])
+	{
+		new_word[i] = word[i];
+		i++;
+	}
 	free(word);
 	new_word[i++] = c;
 	new_word[i] = '\0';
@@ -218,8 +135,12 @@ char	*extend_arg(char *word, char c)
 
 int	join_arg(char **word, char *line, int i, char end_char)
 {
+	printf("end_char is : %c\n", end_char);
+	printf("line[%d] is : %c\n", i, line[i]);
 	while (line[i] != end_char)
-		*word = extend_arg(*word, line[++i]);
+		{*word = extend_arg(*word, line[++i]);
+		printf("i is : %d\n", i);}
+	printf("line[%d] is : %c\n", i, line[i]);
 	return (i);
 }
 
@@ -257,7 +178,7 @@ char	**parse_input(char *line)
 	while (line[i])
 	{
 		if (line[i] == '"' || line[i] == '\'')
-			i = join_arg(&word, line, i, line[i]);
+			i = join_arg(&word, line, i + 1, line[i]);
 		else if (isprint(line[i]) && !isspace(line[i]))
 			word = extend_arg(word, line[i]);
 		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
@@ -275,7 +196,6 @@ char	**parse_input(char *line)
 void	arr_print(char **arr)
 {
 	int	i;
-	int	j;
 
 	i = 0;
 	printf("arr: %p\n", arr);
@@ -287,30 +207,38 @@ void	arr_print(char **arr)
 	}
 }
 
-int main(int ac, char **av)
+t_list	*extract_env(char **env)
 {
-	char	*text;
-	char	**arg_arr;
-	char	**path_arr;
+	t_list	*head;
+	int		i;
 
-	text = NULL;
-	path_arr = NULL;
+	head = NULL;
+	(void)env;
+	// head = ft_lstnew(env[0]);
+	// i = 1;
+	// while (i < arr_len(env))
+	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
+	return (head);
+}
+
+int main(int ac, char **av, char **env)
+{
+	t_vars	my_vars;
+
+	(void)ac;
+	(void)av;
+	my_vars.env = extract_env(env);
+	// arr_print(env);
 	while (1)
 	{
-		// text = input_reader();
-		text = readline("\nLeak your thoughts > ");
-		// ft_putstr(text);
-		arg_arr = parse_input(text);
-		if (arg_arr)
-			arr_print(arg_arr);
-		arr_free(arg_arr);
-		free(text);
+		// my_vars.line = input_reader();
+		my_vars.line = readline("\nLeak your thoughts > ");
+		// ft_putstr(my_vars.line);
+		my_vars.arg_arr = parse_input(my_vars.line);
+		if (my_vars.arg_arr)
+			arr_print(my_vars.arg_arr);
+		arr_free(my_vars.arg_arr);
+		free(my_vars.line);
 	}
 	return (0);
 }
-
-
-// {
-// 	path = ["Desktop/A", "Desktop/b", "Desktop/A/B"];
-// 	command = ["ls", "-l", "|", "grep", "-n", "file1"];
-// }
