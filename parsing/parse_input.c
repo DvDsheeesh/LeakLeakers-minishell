@@ -11,14 +11,22 @@
 // #include "get_next_line/get_next_line.h"
 #include "libft/libft.h"
 
-void	arr_free(char **str_arr)
+
+// typedef struct s_vars
+// {
+// 	void			*content;
+// 	struct s_vars	*next;
+// }					t_vars;
+
+
+void	arr_free(char **arg_arr)
 {
 	int	i;
 
 	i = 0;
-	while (str_arr[i++])
-		free(str_arr[i - 1]);
-	free(str_arr);
+	while (arg_arr && arg_arr[i++])
+		free(arg_arr[i - 1]);
+	free(arg_arr);
 }
 
 int len(char *str)
@@ -161,17 +169,20 @@ char	*input_reader()
 char	*ms_cpy(char *s1)
 {
 	char	*ss;
-	ssize_t	i;
-	ssize_t	j;
+	int		i;
+	int		j;
 
 	ss = malloc(len(s1) + 1);
 	if (!ss)
 		return (NULL);
 	i = 0;
-	if (s1)
+	if (s1 && len(s1) > 0)
 		while (s1[i++])
 			ss[i - 1] = s1[i - 1];
+	if (s1 && len(s1) > 0)
+		i--;
 	ss[i] = '\0';
+	printf("i is : %d\n", i);
 	return (ss);
 }
 
@@ -192,6 +203,11 @@ char	*extend_arg(char *word, char c)
 			i++;
 		}
 	}
+	// while (word && word[i])
+	// {
+	// 	new_word[i] = word[i];
+	// 	i++;
+	// }
 	// while (word && word[i++])
 	// 	new_word[i - 1] = word[i - 1];  // might have leaks
 	free(word);
@@ -202,24 +218,30 @@ char	*extend_arg(char *word, char c)
 
 int	join_arg(char **word, char *line, int i, char end_char)
 {
-	while (line[i++] != end_char)
-		*word = extend_arg(*word, line[i - 1]);
+	while (line[i] != end_char)
+		*word = extend_arg(*word, line[++i]);
 	return (i);
 }
 
-char	**add_arg_to_arr(char **str_arr, char *word)
+char	**add_arg_to_arr(char **arg_arr, char **word)
 {
 	int		i;
+	int		l;
 	char	**new_arr;
 
-	new_arr = malloc(sizeof(char *) * (arr_len(str_arr) + 1));
+	l = arr_len(arg_arr) + 2;
+	new_arr = malloc(sizeof(char *) * l);
 	i = 0;
-	while (str_arr[i])
+	while (arg_arr && arg_arr[i])
 	{
+		new_arr[i] = ms_cpy(arg_arr[i]);
 		i++;
-		new_arr[i] = ms_cpy(str_arr[i]);
 	}
-	arr_free(str_arr);
+	new_arr[i] = ms_cpy(*word);
+	new_arr[++i] = NULL;
+	arr_free(arg_arr);
+	free(*word);
+	*word = NULL;
 	return (new_arr);
 }
 
@@ -227,21 +249,27 @@ char	**parse_input(char *line)
 {
 	int	i;
 	char	*word;
-	char	**str_arr;
+	char	**arg_arr;
 
 	i = 0;
 	word = NULL;
-	while (line[i++])
+	arg_arr = NULL;
+	while (line[i])
 	{
-		if (isspace(line[i - 1]) && word)
-			str_arr = add_arg_to_arr(str_arr, word);
-		if (isalnum(line[i - 1]))
-			word = extend_arg(word, line[i - 1]);
-		if (line[i - 1] == '"' || line[i - 1] == '\'')
-			i = join_arg(&word, line, i, line[i - 1]);
+		if (line[i] == '"' || line[i] == '\'')
+			i = join_arg(&word, line, i, line[i]);
+		else if (isprint(line[i]) && !isspace(line[i]))
+			word = extend_arg(word, line[i]);
+		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
+		{
+			arg_arr = add_arg_to_arr(arg_arr, &word);
+			printf("is_space, new word: %s\n", arg_arr[arr_len(arg_arr) - 1]);
+		}
+		i++;
 	}
-	free(word);
-	return (str_arr);
+	// if (word)
+	// 	free(word);
+	return (arg_arr);
 }
 
 void	arr_print(char **arr)
@@ -250,23 +278,32 @@ void	arr_print(char **arr)
 	int	j;
 
 	i = 0;
+	printf("arr: %p\n", arr);
+	// printf("arr[0]: %s", arr[0]);
 	while (arr && arr[i])
-		ft_putstr(arr[i]);
+	{
+		// ftpf_putnbr(i, 0);
+		ft_putstr(arr[i++]);
+	}
 }
 
 int main(int ac, char **av)
 {
 	char	*text;
-	char	**str_arr;
+	char	**arg_arr;
+	char	**path_arr;
 
+	text = NULL;
+	path_arr = NULL;
 	while (1)
 	{
 		// text = input_reader();
-		text = readline("Leak your thoughts > ");
-		ft_putstr(text);
-		str_arr = parse_input(text);
-		// arr_print(str_arr);
-		// arr_free(str_arr);
+		text = readline("\nLeak your thoughts > ");
+		// ft_putstr(text);
+		arg_arr = parse_input(text);
+		if (arg_arr)
+			arr_print(arg_arr);
+		arr_free(arg_arr);
 		free(text);
 	}
 	return (0);
