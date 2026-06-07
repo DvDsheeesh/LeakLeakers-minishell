@@ -138,7 +138,7 @@ int	join_arg(char **word, char *line, int i, char end_char)
 	printf("end_char is : %c\n", end_char);
 	printf("line[%d] is : %c\n", i, line[i]);
 	while (line[i] != end_char)
-		{*word = extend_arg(*word, line[++i]);
+		{*word = extend_arg(*word, line[i++]);
 		printf("i is : %d\n", i);}
 	printf("line[%d] is : %c\n", i, line[i]);
 	return (i);
