@@ -166,6 +166,21 @@ char	**add_arg_to_arr(char **arg_arr, char **word)
 	return (new_arr);
 }
 
+char	**special_symbols_parse(char **arg_arr, char *line, int *i)
+{
+	char	*word;
+	char	**new_arr;
+
+	word = extend_arg(word, line[*i]);
+	if (line[*i + 1] == line[*i] && line[*i] != '|')
+		word = extend_arg(word, line[(*i)++]);
+	new_arr = add_arg_to_arr(arg_arr, &word);
+	free(word);
+	// arr_free(arg_arr);
+	(*i)++;
+	return (new_arr);
+}
+
 char	**parse_input(char *line)
 {
 	int	i;
@@ -179,17 +194,22 @@ char	**parse_input(char *line)
 	{
 		if (line[i] == '"' || line[i] == '\'')
 			i = join_arg(&word, line, i + 1, line[i]);
+		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
+		{
+			if (word)
+				arg_arr = add_arg_to_arr(arg_arr, &word);
+			// arg_arr = special_symbols_parse(arg_arr, line, &i);
+			word = extend_arg(word, line[i]);
+			if (line[i + 1] == line[i] && line[i] != '|')
+				word = extend_arg(word, line[i++]);
+			arg_arr = add_arg_to_arr(arg_arr, &word);
+		}
 		else if (isprint(line[i]) && !isspace(line[i]))
 			word = extend_arg(word, line[i]);
 		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
-		{
-			arg_arr = add_arg_to_arr(arg_arr, &word);
-			printf("is_space, new word: %s\n", arg_arr[arr_len(arg_arr) - 1]);
-		}
+		{arg_arr = add_arg_to_arr(arg_arr, &word);printf("is_space, new word: %s\n", arg_arr[arr_len(arg_arr) - 1]);}
 		i++;
 	}
-	// if (word)
-	// 	free(word);
 	return (arg_arr);
 }
 

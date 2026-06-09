@@ -16,7 +16,7 @@ all: $(OBJ) $(LIBFT)
 $(LIBFT):
 	@make -C $(LIBFT_DIR)
 
-rerun:
+rerun: all
 	valgrind -s --leak-check=full --track-origins=yes ./minishell
 
 fclean:
