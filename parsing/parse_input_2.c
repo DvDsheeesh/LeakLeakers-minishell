@@ -14,11 +14,11 @@
 
 typedef struct s_vars
 {
+	int		i;
 	t_list	*env;
 	char	*line;
 	char	*word;
-	char	**arg_arr;
-	char	**path_arr;
+	t_list	*arg_arr;
 }			t_vars;
 
 void	arr_free(char **arg_arr)
@@ -213,6 +213,34 @@ char	**parse_input(char *line)
 	return (arg_arr);
 }
 
+char	**parse_input2(t_vars *vars)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (line[i] == '"' || line[i] == '\'')
+			i = join_arg(&word, line, i + 1, line[i]);
+		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
+		{
+			if (word)
+				arg_arr = add_arg_to_arr(arg_arr, &word);
+			// arg_arr = special_symbols_parse(arg_arr, line, &i);
+			word = extend_arg(word, line[i]);
+			if (line[i + 1] == line[i] && line[i] != '|')
+				word = extend_arg(word, line[i++]);
+			arg_arr = add_arg_to_arr(arg_arr, &word);
+		}
+		else if (isprint(line[i]) && !isspace(line[i]))
+			word = extend_arg(word, line[i]);
+		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
+		{arg_arr = add_arg_to_arr(arg_arr, &word);printf("is_space, new word: %s\n", arg_arr[arr_len(arg_arr) - 1]);}
+		i++;
+	}
+	return (arg_arr);
+}
+
 void	arr_print(char **arr)
 {
 	int	i;
@@ -241,6 +269,15 @@ t_list	*extract_env(char **env)
 	return (head);
 }
 
+void	init_vars(t_vars vars)
+{
+	env = NULL;
+	line = NULL;
+	word = NULL;
+	arg_arr = NULL;
+	i = 20;
+}
+
 int main(int ac, char **av, char **env)
 {
 	t_vars	my_vars;
@@ -248,13 +285,12 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	my_vars.env = extract_env(env);
-	// arr_print(env);
+	init_vars(my_vars);
+	ftpf_putnbr(my_vars.i);
 	while (1)
 	{
-		// my_vars.line = input_reader();
 		my_vars.line = readline("\nLeak your thoughts > ");
-		// ft_putstr(my_vars.line);
-		my_vars.arg_arr = parse_input(my_vars.line);
+		my_vars.arg_arr = parse_input(my_vars);
 		if (my_vars.arg_arr)
 			arr_print(my_vars.arg_arr);
 		arr_free(my_vars.arg_arr);
