@@ -7,11 +7,16 @@ LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 SRC = parse_input.c
+SRC2 = parse_input_2.c
 
 OBJ = $(SRC:.c=.o)
+OBJ2 = $(SRC2:.c=.o)
 
 all: $(OBJ) $(LIBFT)
 	$(CC) $(CFLAGS) -lreadline $(OBJ) $(LIBFT) -o $(NAME)
+
+2: $(OBJ2) $(LIBFT)
+	$(CC) $(CFLAGS) -lreadline $(OBJ2) $(LIBFT) -o $(NAME)
 
 $(LIBFT):
 	@make -C $(LIBFT_DIR)
