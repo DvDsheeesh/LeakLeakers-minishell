@@ -7,12 +7,9 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	my_vars.env = extract_env(env);
-	// arr_print(env);
 	while (1)
 	{
-		// my_vars.line = input_reader();
 		my_vars.line = readline("\nLeak your thoughts > ");
-		// ft_putstr(my_vars.line);
 		my_vars.arg_arr = parse_input(my_vars.line);
 		if (my_vars.arg_arr)
 			arr_print(my_vars.arg_arr);
