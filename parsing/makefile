@@ -19,7 +19,7 @@ all: $(OBJ) $(LIBFT)
 	$(CC) $(CFLAGS) -lreadline $(OBJ2) $(LIBFT) -o $(NAME)
 
 $(LIBFT):
-	@make -C $(LIBFT_DIR)
+	@make -C $(LIBFT_DIR) bonus
 
 rerun: all
 	valgrind -s --leak-check=full --track-origins=yes ./minishell

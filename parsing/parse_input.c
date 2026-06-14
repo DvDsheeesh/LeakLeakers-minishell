@@ -160,7 +160,7 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 	return (new_arr);
 }
 
-char	**parse_input(char *line)
+char	**split_input_words(char *line)
 {
 	int	i;
 	char	*word;
@@ -169,7 +169,7 @@ char	**parse_input(char *line)
 	i = 0;
 	word = NULL;
 	arg_arr = NULL;
-	while (line[i])
+	while (line && line[i])
 	{
 		if (line[i] == '"' || line[i] == '\'')
 			i = join_arg(&word, line, i + 1, line[i]);
@@ -177,6 +177,7 @@ char	**parse_input(char *line)
 		{
 			if (word)
 				arg_arr = add_arg_to_arr(arg_arr, &word);
+			// TODO: fix this function
 			// arg_arr = special_symbols_parse(arg_arr, line, &i);
 			word = extend_arg(word, line[i]);
 			if (line[i + 1] == line[i] && line[i] != '|')
@@ -206,18 +207,70 @@ void	arr_print(char **arr)
 	}
 }
 
-t_list	*extract_env(char **env)
-{
-	t_list	*head;
-	int		i;
+// t_list	*extract_env(char **env)
+// {
+// 	t_list	*head;
+// 	int		i;
 
-	head = NULL;
-	(void)env;
-	// head = ft_lstnew(env[0]);
-	// i = 1;
-	// while (i < arr_len(env))
-	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
-	return (head);
+// 	head = NULL;
+// 	(void)env;
+// 	// head = ft_lstnew(env[0]);
+// 	// i = 1;
+// 	// while (i < arr_len(env))
+// 	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
+// 	return (head);
+// }
+
+int	arg_isoperator(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str && str[i])
+	{
+		if (str[i] != '<' || str[i] != '>')
+			return (0);
+	}
+	return (1);
+}
+
+int	*labelizing(t_vars vars)
+{
+	int	*label_arr;
+	int	i;
+
+	i = 0;
+	label_arr = malloc(arr_len(vars.arg_arr) * sizeof(int));
+	while (vars.arg_arr && vars.arg_arr[i])
+	{
+		if (len(vars.arg_arr[i]) == 1 && vars.arg_arr[i] == '|')
+			label_arr[i] = 3;
+		else if (arg_isoperator(vars.arg_arr[i]))
+			label_arr[i] = 2;
+		else
+			label_arr[i] = 1;
+		i++;
+	}
+	return (label_arr);
+}
+
+int	validate_label(int	*label_arr)
+{
+	int	i;
+
+	i = 0;
+	while (label_arr && label_arr[i])
+	{
+		if (label_arr[i] == 2 || label_arr[i] == 3)
+		{
+			(void)i;
+			// if (i != 0 && (label_arr[i - 1] == 2 || label_arr[i - 1] == 3))
+				// to_exit(my_vars);
+			// if (i < (len(label_arr) - 1) && (label_arr[i + 1] == 2 ||
+			// 	label_arr[i + 1] == 3))
+			// 	to_exit(my_vars);
+		}
+	}
 }
 
 int main(int ac, char **av, char **env)
@@ -226,14 +279,25 @@ int main(int ac, char **av, char **env)
 
 	(void)ac;
 	(void)av;
-	my_vars.env = extract_env(env);
+	// my_vars.env = extract_env(env);
 	// arr_print(env);
 	while (1)
 	{
 		// my_vars.line = input_reader();
 		my_vars.line = readline("\nLeak your thoughts > ");
+		// if (my_vars.line == NULL)
+		// 	to_exit(my_vars);
+		if (my_vars.line[0])
+			add_history(my_vars.line);
+		my_vars.arg_arr = split_input_words(my_vars.line);
+		// TODO: add a function that assign labels to words
+		my_vars.label_arr = labelizing(my_vars);
+		// TODO: add a validation function based on the labels
+		// if (!validate_label(my_vars.label_arr))
+		// 	to_exit(my_vars);
+		// TODO: add a parsing function that split each command in a node in a linked list
+
 		// ft_putstr(my_vars.line);
-		my_vars.arg_arr = parse_input(my_vars.line);
 		if (my_vars.arg_arr)
 			arr_print(my_vars.arg_arr);
 		arr_free(my_vars.arg_arr);

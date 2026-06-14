@@ -14,9 +14,9 @@
 
 typedef struct s_vars
 {
-	t_list	*env;
+	// t_list	*env;
 	char	*line;
 	char	*word;
 	char	**arg_arr;
-	char	**path_arr;
+	char	**label_arr;
 }			t_vars;
