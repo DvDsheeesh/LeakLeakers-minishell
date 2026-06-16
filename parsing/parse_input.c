@@ -1,21 +1,52 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_input.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
+/*   Updated: 2026/06/16 22:20:46 by melshata         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-void	arr_free(char **arg_arr)
+void	arr_free(char **arr)
 {
 	int	i;
 
 	i = 0;
-	while (arg_arr && arg_arr[i])
-		free(arg_arr[i++]);
-	free(arg_arr);
+	while (arr && arr[i])
+		free(arr[i++]);
+	if (arr)
+		free(arr);
 }
 
-int len(char *str)
+void	free_vars(t_vars *vars)
+{
+	arr_free(vars->arg_arr);
+	if (vars->label_arr)
+		free(vars->label_arr);
+	if (vars->line)
+		free(vars->line);
+	if (vars->word)
+		free(vars->word);
+}
+
+void	to_exit(t_vars *vars)
+{
+	if (vars)
+		free_vars(vars);
+	exit(0);
+}
+
+int	len(char *str)
 {
 	int	l;
 
 	l = 0;
-	while(str && str[l])
+	while (str && str[l])
 		l++;
 	return (l);
 }
@@ -26,7 +57,7 @@ int	arr_len(char **arr)
 
 	l = 0;
 	if (arr)
-		while(arr[l])
+		while (arr[l])
 			l++;
 	return (l);
 }
@@ -51,14 +82,14 @@ int	ftpf_putnbr(int n, int i)
 	return (i + 1);
 }
 
-void ft_putstr(char *str)
+void	ft_putstr(char	*str)
 {
 	int	i;
 
 	i = 0;
 	if (!str)
 		return ;
-	while(str && str[i])
+	while (str && str[i])
 	{
 		write(1, &str[i], 1);
 		i++;
@@ -117,8 +148,13 @@ int	join_arg(char **word, char *line, int i, char end_char)
 	printf("end_char is : %c\n", end_char);
 	printf("line[%d] is : %c\n", i, line[i]);
 	while (line[i] != end_char)
-		{*word = extend_arg(*word, line[i++]);
-		printf("i is : %d\n", i);}
+	{
+		if (line[i] == '$')
+			NULL;
+			// 
+		*word = extend_arg(*word, line[i++]);
+		printf("i is : %d\n", i);
+	}
 	printf("line[%d] is : %c\n", i, line[i]);
 	return (i);
 }
@@ -160,9 +196,22 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 	return (new_arr);
 }
 
+
+
+int	dollar_of_truth(char **line, int i, int from_quote)
+{
+	char	*word;
+	int		old_i;
+
+	old_i = i;
+	while (line[i] && (isalnum(line[i]) || line[i] == '_'))
+		i++;
+	
+}
+
 char	**split_input_words(char *line)
 {
-	int	i;
+	int		i;
 	char	*word;
 	char	**arg_arr;
 
@@ -173,6 +222,10 @@ char	**split_input_words(char *line)
 	{
 		if (line[i] == '"' || line[i] == '\'')
 			i = join_arg(&word, line, i + 1, line[i]);
+		else if (line[i] != '$')
+			NULL;
+			// dollar_of_truth
+			// add a function that join_arg until not any of [alpha, num, _]
 		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
 		{
 			if (word)
@@ -180,14 +233,15 @@ char	**split_input_words(char *line)
 			// TODO: fix this function
 			// arg_arr = special_symbols_parse(arg_arr, line, &i);
 			word = extend_arg(word, line[i]);
-			if (line[i + 1] == line[i] && line[i] != '|')
+			if (line[i + 1] == line[i]
+				&& (line[i] == '<' || line[i] == '>'))
 				word = extend_arg(word, line[i++]);
 			arg_arr = add_arg_to_arr(arg_arr, &word);
 		}
 		else if (isprint(line[i]) && !isspace(line[i]))
 			word = extend_arg(word, line[i]);
 		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
-		{arg_arr = add_arg_to_arr(arg_arr, &word);printf("is_space, new word: %s\n", arg_arr[arr_len(arg_arr) - 1]);}
+			arg_arr = add_arg_to_arr(arg_arr, &word);
 		i++;
 	}
 	return (arg_arr);
@@ -207,19 +261,19 @@ void	arr_print(char **arr)
 	}
 }
 
-// t_list	*extract_env(char **env)
-// {
-// 	t_list	*head;
-// 	int		i;
+t_list	*extract_env(char **env)
+{
+	t_list	*head;
+	int		i;
 
-// 	head = NULL;
-// 	(void)env;
-// 	// head = ft_lstnew(env[0]);
-// 	// i = 1;
-// 	// while (i < arr_len(env))
-// 	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
-// 	return (head);
-// }
+	head = NULL;
+	(void)env;
+	// head = ft_lstnew(env[0]);
+	// i = 1;
+	// while (i < arr_len(env))
+	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
+	return (head);
+}
 
 int	arg_isoperator(char *str)
 {
@@ -234,74 +288,113 @@ int	arg_isoperator(char *str)
 	return (1);
 }
 
-int	*labelizing(t_vars vars)
+char	*labelizing(t_vars *vars)
 {
-	int	*label_arr;
-	int	i;
+	char	*label_arr;
+	int		i;
 
 	i = 0;
-	label_arr = malloc(arr_len(vars.arg_arr) * sizeof(int));
-	while (vars.arg_arr && vars.arg_arr[i])
+	label_arr = malloc(arr_len(vars->arg_arr) * sizeof(int));
+	while (vars->arg_arr && vars->arg_arr[i])
 	{
-		if (len(vars.arg_arr[i]) == 1 && vars.arg_arr[i] == '|')
-			label_arr[i] = 3;
-		else if (arg_isoperator(vars.arg_arr[i]))
-			label_arr[i] = 2;
+		if (len(vars->arg_arr[i]) == 1 && vars->arg_arr[i][0] == '|')
+			label_arr[i] = '3';
+		else if (arg_isoperator(vars->arg_arr[i]))
+			label_arr[i] = '2';
 		else
-			label_arr[i] = 1;
+			label_arr[i] = '1';
 		i++;
 	}
 	return (label_arr);
 }
 
-int	validate_label(int	*label_arr)
+void	validate_label(t_vars *vars)
 {
 	int	i;
 
 	i = 0;
-	while (label_arr && label_arr[i])
+	while (vars->label_arr && vars->label_arr[i])
 	{
-		if (label_arr[i] == 2 || label_arr[i] == 3)
+		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
 			(void)i;
-			// if (i != 0 && (label_arr[i - 1] == 2 || label_arr[i - 1] == 3))
-				// to_exit(my_vars);
-			// if (i < (len(label_arr) - 1) && (label_arr[i + 1] == 2 ||
-			// 	label_arr[i + 1] == 3))
-			// 	to_exit(my_vars);
+			if (i != 0 && (vars->label_arr[i - 1] == '2'
+					|| vars->label_arr[i - 1] == '3'))
+				to_exit(vars);
+			if (i < (len(vars->label_arr) - 1) && (vars->label_arr[i + 1] == '2'
+					|| vars->label_arr[i + 1] == '3'))
+				to_exit(vars);
 		}
+		i++;
 	}
 }
 
-int main(int ac, char **av, char **env)
+// t_list	*parsing_commands(t_vars *vars)
+// {
+
+// }
+
+t_vars	*vars_init(char *line)
 {
-	t_vars	my_vars;
+	t_vars	*vars;
+
+	vars = malloc(sizeof(t_vars));
+	vars->arg_arr = NULL;
+	vars->label_arr = NULL;
+	vars->line = line;
+	vars->word = NULL;
+	return (vars);
+}
+
+void	inline_signal(int sig)
+{
+	(void)sig;
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+	// g_sig_status = 130;
+}
+
+int	main(int ac, char **av, char **env)
+{
+	t_vars	*vars;
+	char	*line;
 
 	(void)ac;
 	(void)av;
-	// my_vars.env = extract_env(env);
-	// arr_print(env);
+	line = NULL;
 	while (1)
 	{
-		// my_vars.line = input_reader();
-		my_vars.line = readline("\nLeak your thoughts > ");
-		// if (my_vars.line == NULL)
-		// 	to_exit(my_vars);
-		if (my_vars.line[0])
-			add_history(my_vars.line);
-		my_vars.arg_arr = split_input_words(my_vars.line);
+		printf("\ntest1\n");
+		signal(SIGINT, inline_signal);
+		signal(SIGQUIT, SIG_IGN);
+		printf("\ntest2\n");
+		line = readline("\nLeak your thoughts > ");
+		printf("\ntest3\n");
+		if (line == NULL)
+			to_exit(vars);
+		printf("\ntest4\n");
+		if (line[0])
+			add_history(line);
+		printf("\ntest5\n");
+		vars = vars_init(line);
+		printf("\ntest6\n");
+		vars->arg_arr = split_input_words(line);
+		if (vars->arg_arr)
+			arr_print(vars->arg_arr);
+		// printf("\ntest6.1\n");
 		// TODO: add a function that assign labels to words
-		my_vars.label_arr = labelizing(my_vars);
+		// vars->label_arr = labelizing(vars);
+		// printf("\ntest6.2\n");
 		// TODO: add a validation function based on the labels
-		// if (!validate_label(my_vars.label_arr))
-		// 	to_exit(my_vars);
+		// validate_label(vars);
 		// TODO: add a parsing function that split each command in a node in a linked list
 
-		// ft_putstr(my_vars.line);
-		if (my_vars.arg_arr)
-			arr_print(my_vars.arg_arr);
-		arr_free(my_vars.arg_arr);
-		free(my_vars.line);
+		// ft_putstr(line);
+		printf("\ntest7\n");
+		if (vars)
+			free_vars(vars);
 	}
 	return (0);
 }

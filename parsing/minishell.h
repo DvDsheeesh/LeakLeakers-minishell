@@ -17,6 +17,6 @@ typedef struct s_vars
 	// t_list	*env;
 	char	*line;
 	char	*word;
+	char	*label_arr;
 	char	**arg_arr;
-	char	**label_arr;
 }			t_vars;
