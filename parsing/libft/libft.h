@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 18:51:00 by melshata          #+#    #+#             */
-/*   Updated: 2026/01/12 10:40:03 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/17 18:21:32 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 typedef struct s_list
 {
-	void			*content;
+	char			**content;
 	struct s_list	*next;
 }					t_list;
 

@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/16 22:20:46 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/17 20:13:08 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@ void	arr_free(char **arr)
 
 void	free_vars(t_vars *vars)
 {
-	arr_free(vars->arg_arr);
-	if (vars->label_arr)
+	if (vars->arg_arr)
+		arr_free(vars->arg_arr);
+	if (vars->label_arr && *(vars->label_arr))
 		free(vars->label_arr);
-	if (vars->line)
+	if (vars->line && *(vars->line))
 		free(vars->line);
 	if (vars->word)
 		free(vars->word);
@@ -162,19 +163,18 @@ int	join_arg(char **word, char *line, int i, char end_char)
 char	**add_arg_to_arr(char **arg_arr, char **word)
 {
 	int		i;
-	int		l;
 	char	**new_arr;
 
-	l = arr_len(arg_arr) + 2;
-	new_arr = malloc(sizeof(char *) * l);
+	new_arr = malloc(sizeof(char *) * (arr_len(arg_arr) + 2));
 	i = 0;
 	while (arg_arr && arg_arr[i])
 	{
 		new_arr[i] = ms_cpy(arg_arr[i]);
 		i++;
 	}
-	new_arr[i] = ms_cpy(*word);
-	new_arr[++i] = NULL;
+	if (word && *word)
+		new_arr[i++] = ms_cpy(*word);
+	new_arr[i] = NULL;
 	arr_free(arg_arr);
 	free(*word);
 	*word = NULL;
@@ -198,16 +198,16 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 
 
 
-int	dollar_of_truth(char **line, int i, int from_quote)
-{
-	char	*word;
-	int		old_i;
+// int	dollar_of_truth(char **line, int i, int from_quote)
+// {
+// 	char	*word;
+// 	int		old_i;
 
-	old_i = i;
-	while (line[i] && (isalnum(line[i]) || line[i] == '_'))
-		i++;
+// 	old_i = i;
+// 	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_'))
+// 		i++;
 	
-}
+// }
 
 char	**split_input_words(char *line)
 {
@@ -294,7 +294,7 @@ char	*labelizing(t_vars *vars)
 	int		i;
 
 	i = 0;
-	label_arr = malloc(arr_len(vars->arg_arr) * sizeof(int));
+	label_arr = malloc(arr_len(vars->arg_arr) + 1);
 	while (vars->arg_arr && vars->arg_arr[i])
 	{
 		if (len(vars->arg_arr[i]) == 1 && vars->arg_arr[i][0] == '|')
@@ -305,6 +305,7 @@ char	*labelizing(t_vars *vars)
 			label_arr[i] = '1';
 		i++;
 	}
+	label_arr[i] = '\0';
 	return (label_arr);
 }
 
@@ -329,10 +330,47 @@ void	validate_label(t_vars *vars)
 	}
 }
 
-// t_list	*parsing_commands(t_vars *vars)
-// {
+char	**move_word(t_vars *vars, t_list *list)
+{
+	char	**temp;
 
-// }
+	list->content = add_arg_to_arr(list->content, &(vars->arg_arr[0]));
+	temp = add_arg_to_arr(&(vars->arg_arr[1]), NULL);
+	arr_free(vars->arg_arr);
+	vars->arg_arr = temp;
+	return (list->content);
+}
+
+t_list	*parsing_commands(t_vars *vars)
+{
+	t_list	*head;
+	int		i;
+	int		is_input;
+	int		is_output;
+
+	is_input = 0;
+	is_output = 0;
+	head = ft_lstnew(NULL);
+	i = 0;
+	while(vars->arg_arr && vars->arg_arr[i] && vars->arg_arr[i][0])
+	{
+		if (len(vars->arg_arr[0]) == 1 && vars->arg_arr[i][0] == '|')
+			ft_lstlast(head)->next = ft_lstnew(NULL);
+		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '<')
+		{
+			is_input = 1;
+			is_output = 0;
+		}
+		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '<')
+		{
+			is_input = 0;
+			is_output = 1;
+		}
+		else
+			vars->arg_arr = move_word(vars, ft_lstlast(head));
+	}
+	return (head);
+}
 
 t_vars	*vars_init(char *line)
 {
@@ -364,6 +402,7 @@ int	main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	line = NULL;
+	vars = NULL;
 	while (1)
 	{
 		printf("\ntest1\n");
@@ -372,8 +411,8 @@ int	main(int ac, char **av, char **env)
 		printf("\ntest2\n");
 		line = readline("\nLeak your thoughts > ");
 		printf("\ntest3\n");
-		if (line == NULL)
-			to_exit(vars);
+		// if (line == NULL)
+		// 	to_exit(vars);
 		printf("\ntest4\n");
 		if (line[0])
 			add_history(line);
@@ -385,10 +424,10 @@ int	main(int ac, char **av, char **env)
 			arr_print(vars->arg_arr);
 		// printf("\ntest6.1\n");
 		// TODO: add a function that assign labels to words
-		// vars->label_arr = labelizing(vars);
+		vars->label_arr = labelizing(vars);
 		// printf("\ntest6.2\n");
 		// TODO: add a validation function based on the labels
-		// validate_label(vars);
+		validate_label(vars);
 		// TODO: add a parsing function that split each command in a node in a linked list
 
 		// ft_putstr(line);
