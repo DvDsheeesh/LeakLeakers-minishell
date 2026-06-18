@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 18:51:00 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/13 12:13:18 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/18 18:55:43 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ char	*extend_str(char *word, char c)
 }
 
 /* Frees a NULL-terminated 2D array */
-void	arr_free(char **arr)
+void	free_arr(char **arr)
 {
 	int	i;
 
@@ -99,7 +99,7 @@ void	free_cmd(void *content)
 	cmd = (t_cmd *)content;
 	if (!cmd)
 		return ;
-	arr_free(cmd->args);
+	free_arr(cmd->args);
 	free(cmd->infile);
 	free(cmd->outfile);
 	free(cmd->heredoc);
@@ -110,7 +110,7 @@ void	free_cmd(void *content)
 void	free_vars(t_vars *v)
 {
 	ft_lstclear(&v->cmd_list, free_cmd);
-	arr_free(v->tokens);
+	free_arr(v->tokens);
 	free(v->line);
 	v->tokens = NULL;
 	v->line = NULL;

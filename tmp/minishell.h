@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 18:51:00 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/11 20:58:53 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/18 18:55:43 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ int		ms_strlen(char *s);
 int		arr_len(char **arr);
 char	*ms_cpy(char *s1);
 char	*extend_str(char *word, char c);
-void	arr_free(char **arr);
+void	free_arr(char **arr);
 void	free_cmd(void *content);
 void	free_vars(t_vars *v);
 
