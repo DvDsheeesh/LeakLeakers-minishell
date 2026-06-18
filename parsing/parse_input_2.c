@@ -12,8 +12,8 @@ int main(int ac, char **av, char **env)
 		my_vars.line = readline("\nLeak your thoughts > ");
 		my_vars.arg_arr = parse_input(my_vars.line);
 		if (my_vars.arg_arr)
-			arr_print(my_vars.arg_arr);
-		arr_free(my_vars.arg_arr);
+			print_arr(my_vars.arg_arr);
+		free_arr(my_vars.arg_arr);
 		free(my_vars.line);
 	}
 	return (0);

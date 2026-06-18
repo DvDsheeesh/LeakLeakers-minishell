@@ -6,13 +6,13 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/17 20:13:08 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/18 19:25:20 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	arr_free(char **arr)
+void	free_arr(char **arr)
 {
 	int	i;
 
@@ -26,13 +26,28 @@ void	arr_free(char **arr)
 void	free_vars(t_vars *vars)
 {
 	if (vars->arg_arr)
-		arr_free(vars->arg_arr);
+		free_arr(vars->arg_arr);
 	if (vars->label_arr && *(vars->label_arr))
 		free(vars->label_arr);
 	if (vars->line && *(vars->line))
 		free(vars->line);
 	if (vars->word)
 		free(vars->word);
+}
+
+void	free_cmd(t_cmd *cmd)
+{
+	if (cmd->command_args)
+		free_arr(cmd->command_args);
+	free(cmd);
+}
+
+void	free_cmd_all(t_cmd *cmd)
+{
+	if (cmd->command_args)
+		free_arr(cmd->command_args);
+	free_cmd_all(cmd->next);
+	free(cmd);
 }
 
 void	to_exit(t_vars *vars)
@@ -61,6 +76,32 @@ int	arr_len(char **arr)
 		while (arr[l])
 			l++;
 	return (l);
+}
+
+t_cmd	*create_command_node(int infile, int outfile)
+{
+	t_cmd	*aa;
+
+	aa = malloc(sizeof(t_cmd));
+	if (!aa)
+		return (NULL);
+	aa->command_args = NULL;
+	aa->infile = infile;
+	aa->outfile = outfile;
+	aa->next = NULL;
+	return (aa);
+}
+
+t_cmd	*last_command(t_cmd *lst)
+{
+	t_cmd	*p;
+
+	if (!lst)
+		return (NULL);
+	p = lst;
+	while (p->next != NULL)
+		p = p->next;
+	return (p);
 }
 
 int	ftpf_putnbr(int n, int i)
@@ -160,7 +201,7 @@ int	join_arg(char **word, char *line, int i, char end_char)
 	return (i);
 }
 
-char	**add_arg_to_arr(char **arg_arr, char **word)
+char	**add_arg_to_arr(char **arg_arr, char **word, int should_free)
 {
 	int		i;
 	char	**new_arr;
@@ -173,11 +214,14 @@ char	**add_arg_to_arr(char **arg_arr, char **word)
 		i++;
 	}
 	if (word && *word)
+	{
 		new_arr[i++] = ms_cpy(*word);
+		free(*word);
+		*word = NULL;
+	}
 	new_arr[i] = NULL;
-	arr_free(arg_arr);
-	free(*word);
-	*word = NULL;
+	if (should_free)
+		free_arr(arg_arr);
 	return (new_arr);
 }
 
@@ -189,14 +233,12 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 	word = extend_arg(word, line[*i]);
 	if (line[*i + 1] == line[*i] && line[*i] != '|')
 		word = extend_arg(word, line[(*i)++]);
-	new_arr = add_arg_to_arr(arg_arr, &word);
+	new_arr = add_arg_to_arr(arg_arr, &word, 1);
 	free(word);
-	// arr_free(arg_arr);
+	// free_arr(arg_arr);
 	(*i)++;
 	return (new_arr);
 }
-
-
 
 // int	dollar_of_truth(char **line, int i, int from_quote)
 // {
@@ -206,7 +248,7 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 // 	old_i = i;
 // 	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_'))
 // 		i++;
-	
+
 // }
 
 char	**split_input_words(char *line)
@@ -222,32 +264,32 @@ char	**split_input_words(char *line)
 	{
 		if (line[i] == '"' || line[i] == '\'')
 			i = join_arg(&word, line, i + 1, line[i]);
-		else if (line[i] != '$')
+		else if (line[i] == '$' && line[i + 1] != '$')
 			NULL;
 			// dollar_of_truth
 			// add a function that join_arg until not any of [alpha, num, _]
 		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
 		{
 			if (word)
-				arg_arr = add_arg_to_arr(arg_arr, &word);
+				arg_arr = add_arg_to_arr(arg_arr, &word, 1);
 			// TODO: fix this function
 			// arg_arr = special_symbols_parse(arg_arr, line, &i);
 			word = extend_arg(word, line[i]);
 			if (line[i + 1] == line[i]
 				&& (line[i] == '<' || line[i] == '>'))
 				word = extend_arg(word, line[i++]);
-			arg_arr = add_arg_to_arr(arg_arr, &word);
+			arg_arr = add_arg_to_arr(arg_arr, &word, 1);
 		}
 		else if (isprint(line[i]) && !isspace(line[i]))
 			word = extend_arg(word, line[i]);
 		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
-			arg_arr = add_arg_to_arr(arg_arr, &word);
+			arg_arr = add_arg_to_arr(arg_arr, &word, 1);
 		i++;
 	}
 	return (arg_arr);
 }
 
-void	arr_print(char **arr)
+void	print_arr(char **arr)
 {
 	int	i;
 
@@ -261,17 +303,17 @@ void	arr_print(char **arr)
 	}
 }
 
-t_list	*extract_env(char **env)
+t_cmd	*extract_env(char **env)
 {
-	t_list	*head;
+	t_cmd	*head;
 	int		i;
 
 	head = NULL;
 	(void)env;
-	// head = ft_lstnew(env[0]);
+	// head = create_command_node(env[0]);
 	// i = 1;
 	// while (i < arr_len(env))
-	// 	ft_lstadd_back(&head, ft_lstnew(env[i]));
+	// 	ft_lstadd_back(&head, create_command_node(env[i]));
 	return (head);
 }
 
@@ -318,56 +360,47 @@ void	validate_label(t_vars *vars)
 	{
 		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
-			(void)i;
-			if (i != 0 && (vars->label_arr[i - 1] == '2'
-					|| vars->label_arr[i - 1] == '3'))
+			if (i == 0 || i == (len(vars->label_arr) - 1))
 				to_exit(vars);
-			if (i < (len(vars->label_arr) - 1) && (vars->label_arr[i + 1] == '2'
-					|| vars->label_arr[i + 1] == '3'))
+			if (vars->label_arr[i - 1] == '2' || vars->label_arr[i - 1] == '3')
+				to_exit(vars);
+			if (vars->label_arr[i + 1] == '2' || vars->label_arr[i + 1] == '3')
 				to_exit(vars);
 		}
 		i++;
 	}
 }
 
-char	**move_word(t_vars *vars, t_list *list)
+// char	**move_word(t_vars *vars, t_cmd *list)
+// {
+// 	char	**temp;
+
+// 	list->content = add_arg_to_arr(list->content, &(vars->arg_arr[0]), 1);
+// 	return (list->content);
+// }
+
+t_cmd	*parsing_commands(t_vars *vars)
 {
+	t_cmd	*head;
 	char	**temp;
-
-	list->content = add_arg_to_arr(list->content, &(vars->arg_arr[0]));
-	temp = add_arg_to_arr(&(vars->arg_arr[1]), NULL);
-	arr_free(vars->arg_arr);
-	vars->arg_arr = temp;
-	return (list->content);
-}
-
-t_list	*parsing_commands(t_vars *vars)
-{
-	t_list	*head;
 	int		i;
-	int		is_input;
-	int		is_output;
 
-	is_input = 0;
-	is_output = 0;
-	head = ft_lstnew(NULL);
+	head = create_command_node(0, 0);
 	i = 0;
-	while(vars->arg_arr && vars->arg_arr[i] && vars->arg_arr[i][0])
+	while (vars->arg_arr && vars->arg_arr[i] && vars->arg_arr[i][0])
 	{
+		temp = add_arg_to_arr(&(vars->arg_arr[1]), NULL, 0);
 		if (len(vars->arg_arr[0]) == 1 && vars->arg_arr[i][0] == '|')
-			ft_lstlast(head)->next = ft_lstnew(NULL);
+			last_command(head)->next = create_command_node(0, 0);
 		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '<')
-		{
-			is_input = 1;
-			is_output = 0;
-		}
-		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '<')
-		{
-			is_input = 0;
-			is_output = 1;
-		}
+			last_command(head)->next = create_command_node(1, 0);
+		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '>')
+			last_command(head)->next = create_command_node(0, 1);
 		else
-			vars->arg_arr = move_word(vars, ft_lstlast(head));
+			last_command(head)->command_args = add_arg_to_arr(
+				last_command(head)->command_args, vars->arg_arr, 1);
+		free_arr(vars->arg_arr);
+		vars->arg_arr = temp;
 	}
 	return (head);
 }
@@ -394,10 +427,21 @@ void	inline_signal(int sig)
 	// g_sig_status = 130;
 }
 
+void	print_cmd(t_cmd *cmd)
+{
+	while (cmd != NULL)
+	{
+		print_arr(cmd->command_args);
+		ft_putstr("\n\n");
+		cmd = cmd->next;
+	}
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_vars	*vars;
 	char	*line;
+	t_cmd	*cmd;
 
 	(void)ac;
 	(void)av;
@@ -421,15 +465,16 @@ int	main(int ac, char **av, char **env)
 		printf("\ntest6\n");
 		vars->arg_arr = split_input_words(line);
 		if (vars->arg_arr)
-			arr_print(vars->arg_arr);
-		// printf("\ntest6.1\n");
+			print_arr(vars->arg_arr);
+		printf("\ntest6.1\n");
 		// TODO: add a function that assign labels to words
 		vars->label_arr = labelizing(vars);
-		// printf("\ntest6.2\n");
+		printf("\ntest6.2\n");
 		// TODO: add a validation function based on the labels
 		validate_label(vars);
 		// TODO: add a parsing function that split each command in a node in a linked list
-
+		cmd = parsing_commands(vars);
+		print_cmd(cmd);
 		// ft_putstr(line);
 		printf("\ntest7\n");
 		if (vars)

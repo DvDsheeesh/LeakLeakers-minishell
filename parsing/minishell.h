@@ -12,6 +12,14 @@
 #include "libft/libft.h"
 
 
+typedef struct s_commands
+{
+	char				**command_args;
+	int					infile;
+	int					outfile;
+	struct s_commands	*next;
+}	t_cmd;
+
 typedef struct s_vars
 {
 	// t_list	*env;

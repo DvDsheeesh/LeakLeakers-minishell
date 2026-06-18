@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/14 18:51:00 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/13 12:05:16 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/18 19:22:09 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ typedef struct s_vars
 
 #include "minishell.h"
 
-void	arr_free(char **arg_arr)
+void	free_arr(char **arg_arr)
 {
 	int	i;
 
@@ -253,7 +253,7 @@ char	**add_arg_to_arr(char **arg_arr, char **word)
 	}
 	new_arr[i] = ms_cpy(*word);
 	new_arr[++i] = NULL;
-	arr_free(arg_arr);
+	free_arr(arg_arr);
 	free(*word);
 	*word = NULL;
 	return (new_arr);
@@ -269,7 +269,7 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 		word = extend_arg(word, line[(*i)++]);
 	new_arr = add_arg_to_arr(arg_arr, &word);
 	free(word);
-	// arr_free(arg_arr);
+	// free_arr(arg_arr);
 	(*i)++;
 	return (new_arr);
 }
@@ -306,7 +306,7 @@ char	**parse_input(char *line)
 	return (arg_arr);
 }
 
-void	arr_print(char **arr)
+void	print_arr(char **arr)
 {
 	int	i;
 
@@ -341,7 +341,7 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 	my_vars.env = extract_env(env);
-	// arr_print(env);
+	// print_arr(env);
 	while (1)
 	{
 		// my_vars.line = input_reader();
@@ -349,8 +349,8 @@ int main(int ac, char **av, char **env)
 		// ft_putstr(my_vars.line);
 		my_vars.arg_arr = parse_input(my_vars.line);
 		if (my_vars.arg_arr)
-			arr_print(my_vars.arg_arr);
-		arr_free(my_vars.arg_arr);
+			print_arr(my_vars.arg_arr);
+		free_arr(my_vars.arg_arr);
 		free(my_vars.line);
 	}
 	return (0);
