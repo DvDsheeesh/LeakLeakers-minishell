@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/18 19:25:20 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:19:02 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,14 +25,18 @@ void	free_arr(char **arr)
 
 void	free_vars(t_vars *vars)
 {
-	if (vars->arg_arr)
-		free_arr(vars->arg_arr);
+	if (vars->arg_arr){
+		free_arr(vars->arg_arr);}
+	vars->arg_arr = NULL;
 	if (vars->label_arr && *(vars->label_arr))
 		free(vars->label_arr);
+	vars->label_arr = NULL;
 	if (vars->line && *(vars->line))
 		free(vars->line);
+	vars->line = NULL;
 	if (vars->word)
 		free(vars->word);
+	vars->word = NULL;
 }
 
 void	free_cmd(t_cmd *cmd)
@@ -55,6 +59,29 @@ void	to_exit(t_vars *vars)
 	if (vars)
 		free_vars(vars);
 	exit(0);
+}
+
+void	reset_line()
+{
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+}
+
+void	wrong_format(t_vars *vars)
+{
+	write(1, "\n", 1);
+	ft_putstr_fd("invalid syntax", 1);
+	free_vars(vars);
+	reset_line();
+}
+
+void	inline_signal(int sig)
+{
+	(void)sig;
+	reset_line();
+	// g_sig_status = 130;
 }
 
 int	len(char *str)
@@ -124,20 +151,20 @@ int	ftpf_putnbr(int n, int i)
 	return (i + 1);
 }
 
-void	ft_putstr(char	*str)
-{
-	int	i;
+// void	ft_putstr(char	*str)
+// {
+// 	int	i;
 
-	i = 0;
-	if (!str)
-		return ;
-	while (str && str[i])
-	{
-		write(1, &str[i], 1);
-		i++;
-	}
-	write(1, "\n", 1);
-}
+// 	i = 0;
+// 	if (!str)
+// 		return ;
+// 	while (str && str[i])
+// 	{
+// 		write(1, &str[i], 1);
+// 		i++;
+// 	}
+// 	write(1, "\n", 1);
+// }
 
 char	*ms_cpy(char *s1)
 {
@@ -299,7 +326,8 @@ void	print_arr(char **arr)
 	while (arr && arr[i])
 	{
 		// ftpf_putnbr(i, 0);
-		ft_putstr(arr[i++]);
+		ft_putstr_fd(arr[i++], 1);
+		write(1, "\n", 1);
 	}
 }
 
@@ -324,8 +352,9 @@ int	arg_isoperator(char *str)
 	i = 0;
 	while (str && str[i])
 	{
-		if (str[i] != '<' || str[i] != '>')
+		if (str[i] != '<' && str[i] != '>')
 			return (0);
+		i++;
 	}
 	return (1);
 }
@@ -351,7 +380,7 @@ char	*labelizing(t_vars *vars)
 	return (label_arr);
 }
 
-void	validate_label(t_vars *vars)
+int	validate_label(t_vars *vars)
 {
 	int	i;
 
@@ -361,14 +390,17 @@ void	validate_label(t_vars *vars)
 		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
 			if (i == 0 || i == (len(vars->label_arr) - 1))
-				to_exit(vars);
+				wrong_format(vars);
 			if (vars->label_arr[i - 1] == '2' || vars->label_arr[i - 1] == '3')
-				to_exit(vars);
+				wrong_format(vars);
 			if (vars->label_arr[i + 1] == '2' || vars->label_arr[i + 1] == '3')
-				to_exit(vars);
+				wrong_format(vars);
+			if (i == -1)
+				return (0);
 		}
 		i++;
 	}
+	return (1);
 }
 
 // char	**move_word(t_vars *vars, t_cmd *list)
@@ -417,22 +449,12 @@ t_vars	*vars_init(char *line)
 	return (vars);
 }
 
-void	inline_signal(int sig)
-{
-	(void)sig;
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-	// g_sig_status = 130;
-}
-
 void	print_cmd(t_cmd *cmd)
 {
 	while (cmd != NULL)
 	{
 		print_arr(cmd->command_args);
-		ft_putstr("\n\n");
+		ft_putstr_fd("\n\n", 1);
 		cmd = cmd->next;
 	}
 }
@@ -455,10 +477,10 @@ int	main(int ac, char **av, char **env)
 		printf("\ntest2\n");
 		line = readline("\nLeak your thoughts > ");
 		printf("\ntest3\n");
-		// if (line == NULL)
-		// 	to_exit(vars);
+		if (line == NULL)
+			to_exit(vars);
 		printf("\ntest4\n");
-		if (line[0])
+		if (line && line[0])
 			add_history(line);
 		printf("\ntest5\n");
 		vars = vars_init(line);
@@ -471,14 +493,17 @@ int	main(int ac, char **av, char **env)
 		vars->label_arr = labelizing(vars);
 		printf("\ntest6.2\n");
 		// TODO: add a validation function based on the labels
-		validate_label(vars);
-		// TODO: add a parsing function that split each command in a node in a linked list
-		cmd = parsing_commands(vars);
-		print_cmd(cmd);
-		// ft_putstr(line);
-		printf("\ntest7\n");
+		if (validate_label(vars))
+		{
+			// TODO: add a parsing function that split each command in a node in a linked list
+			cmd = parsing_commands(vars);
+			print_cmd(cmd);
+			// ft_putstr_fd(line, 1);
+			printf("\ntest6.3\n");
+		}
 		if (vars)
 			free_vars(vars);
+		printf("\ntest7\n");
 	}
 	return (0);
 }
