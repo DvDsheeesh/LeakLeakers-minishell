@@ -3,14 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/20 13:40:37 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/21 00:15:19 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
+
+static int	exec_builtin_redir(t_cmd *cmd, t_info *info)
+{
+	int	saved[2];
+	int	ret;
+
+	if (cmd->infile == -1 && cmd->outfile == -1)
+		return (exec_builtin(cmd, info));
+	saved[0] = dup(STDIN_FILENO);
+	saved[1] = dup(STDOUT_FILENO);
+	if (cmd->infile != -1)
+		dup2(cmd->infile, STDIN_FILENO);
+	if (cmd->outfile != -1)
+		dup2(cmd->outfile, STDOUT_FILENO);
+	ret = exec_builtin(cmd, info);
+	dup2(saved[0], STDIN_FILENO);
+	dup2(saved[1], STDOUT_FILENO);
+	close(saved[0]);
+	close(saved[1]);
+	return (ret);
+}
 
 static void	child_process(t_cmd *cmd, t_info *info, char *path)
 {
@@ -60,8 +81,10 @@ int	execute(t_cmd *cmd, t_info *info)
 
 	if (!cmd || !cmd->command_args || !cmd->command_args[0])
 		return (0);
+	if (cmd->next)
+		return (execute_pipeline(cmd, info));
 	if (is_builtin(cmd->command_args[0]))
-		return (exec_builtin(cmd, info));
+		return (exec_builtin_redir(cmd, info));
 	path = get_path(cmd->command_args[0], info->env);
 	if (!path)
 		return (cmd_not_found(cmd->command_args[0]));

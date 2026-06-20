@@ -13,7 +13,8 @@ SRCS	= main.c \
 		  builtins_exit.c \
 		  builtins_unset.c \
 		  parser.c \
-		  executor.c
+		  executor.c \
+		  pipe.c
 
 
 OBJ		= $(SRCS:.c=.o)
