@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/19 17:19:02 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/20 14:59:11 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,25 +18,33 @@ void	free_arr(char **arr)
 
 	i = 0;
 	while (arr && arr[i])
-		free(arr[i++]);
+	{
+		free(arr[i]);
+		arr[i++] = NULL;
+	}
 	if (arr)
 		free(arr);
+	arr = NULL;
 }
 
 void	free_vars(t_vars *vars)
 {
-	if (vars->arg_arr){
-		free_arr(vars->arg_arr);}
-	vars->arg_arr = NULL;
-	if (vars->label_arr && *(vars->label_arr))
-		free(vars->label_arr);
-	vars->label_arr = NULL;
-	if (vars->line && *(vars->line))
-		free(vars->line);
-	vars->line = NULL;
-	if (vars->word)
-		free(vars->word);
-	vars->word = NULL;
+	if (vars)
+	{
+		if (vars->arg_arr)
+			free_arr(vars->arg_arr);
+		vars->arg_arr = NULL;
+		if (vars->label_arr)
+			free(vars->label_arr);
+		vars->label_arr = NULL;
+		if (vars->line)
+			free(vars->line);
+		vars->line = NULL;
+		if (vars->word)
+			free(vars->word);
+		vars->word = NULL;
+		free(vars);
+	}
 }
 
 void	free_cmd(t_cmd *cmd)
@@ -48,20 +56,27 @@ void	free_cmd(t_cmd *cmd)
 
 void	free_cmd_all(t_cmd *cmd)
 {
-	if (cmd->command_args)
-		free_arr(cmd->command_args);
-	free_cmd_all(cmd->next);
-	free(cmd);
+	if (cmd->next)
+		free_cmd_all(cmd->next);
+	free_cmd(cmd);
+	// free(cmd);
 }
 
-void	to_exit(t_vars *vars)
+void	free_all(t_vars *vars, t_cmd *cmd)
 {
 	if (vars)
 		free_vars(vars);
+	if (cmd)
+		free_cmd_all(cmd);
+}
+
+void	to_exit(t_vars *vars, t_cmd *cmd)
+{
+	free_all(vars, cmd);
 	exit(0);
 }
 
-void	reset_line()
+void	reset_line(void)
 {
 	write(1, "\n", 1);
 	rl_on_new_line();
@@ -69,12 +84,13 @@ void	reset_line()
 	rl_redisplay();
 }
 
-void	wrong_format(t_vars *vars)
+void	wrong_format(t_vars *vars, int *i)
 {
 	write(1, "\n", 1);
-	ft_putstr_fd("invalid syntax", 1);
-	free_vars(vars);
-	reset_line();
+	ft_putstr_fd("** invalid syntax **\n", 1);
+	*i = -1;
+	// free_vars(vars);
+	// reset_line();
 }
 
 void	inline_signal(int sig)
@@ -228,7 +244,8 @@ int	join_arg(char **word, char *line, int i, char end_char)
 	return (i);
 }
 
-char	**add_arg_to_arr(char **arg_arr, char **word, int should_free)
+char	**add_arg_to_arr(char **arg_arr, char **word,
+	int free_old_arr, int free_word)
 {
 	int		i;
 	char	**new_arr;
@@ -243,11 +260,14 @@ char	**add_arg_to_arr(char **arg_arr, char **word, int should_free)
 	if (word && *word)
 	{
 		new_arr[i++] = ms_cpy(*word);
-		free(*word);
-		*word = NULL;
+		if (free_word)
+		{
+			free(*word);
+			*word = NULL;
+		}
 	}
 	new_arr[i] = NULL;
-	if (should_free)
+	if (free_old_arr)
 		free_arr(arg_arr);
 	return (new_arr);
 }
@@ -257,13 +277,20 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 	char	*word;
 	char	**new_arr;
 
-	word = extend_arg(word, line[*i]);
-	if (line[*i + 1] == line[*i] && line[*i] != '|')
-		word = extend_arg(word, line[(*i)++]);
-	new_arr = add_arg_to_arr(arg_arr, &word, 1);
-	free(word);
+	// word = extend_arg(word, line[*i]);
+	// if (line[*i + 1] == line[*i] && line[*i] != '|')
+	// 	word = extend_arg(word, line[(*i)++]);
+	// new_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
+	// free(word);
 	// free_arr(arg_arr);
-	(*i)++;
+	// (*i)++;
+
+	word = extend_arg(word, line[*i]);
+	if (line[(*i) + 1] == line[*i]
+		&& (line[*i] == '<' || line[*i] == '>'))
+		word = extend_arg(word, line[(*i)++]);
+	new_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
+
 	return (new_arr);
 }
 
@@ -278,7 +305,7 @@ char	**special_symbols_parse(char **arg_arr, char *line, int *i)
 
 // }
 
-char	**split_input_words(char *line)
+char	**split_input_words(char *line, t_vars *vars)
 {
 	int		i;
 	char	*word;
@@ -298,19 +325,19 @@ char	**split_input_words(char *line)
 		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
 		{
 			if (word)
-				arg_arr = add_arg_to_arr(arg_arr, &word, 1);
+				arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
 			// TODO: fix this function
 			// arg_arr = special_symbols_parse(arg_arr, line, &i);
 			word = extend_arg(word, line[i]);
 			if (line[i + 1] == line[i]
 				&& (line[i] == '<' || line[i] == '>'))
 				word = extend_arg(word, line[i++]);
-			arg_arr = add_arg_to_arr(arg_arr, &word, 1);
+			arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
 		}
 		else if (isprint(line[i]) && !isspace(line[i]))
 			word = extend_arg(word, line[i]);
 		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
-			arg_arr = add_arg_to_arr(arg_arr, &word, 1);
+			arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
 		i++;
 	}
 	return (arg_arr);
@@ -390,11 +417,13 @@ int	validate_label(t_vars *vars)
 		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
 			if (i == 0 || i == (len(vars->label_arr) - 1))
-				wrong_format(vars);
-			if (vars->label_arr[i - 1] == '2' || vars->label_arr[i - 1] == '3')
-				wrong_format(vars);
-			if (vars->label_arr[i + 1] == '2' || vars->label_arr[i + 1] == '3')
-				wrong_format(vars);
+				wrong_format(vars, &i);
+			else if (vars->label_arr[i - 1] == '2'
+				|| vars->label_arr[i - 1] == '3')
+				wrong_format(vars, &i);
+			else if (vars->label_arr[i + 1] == '2'
+				|| vars->label_arr[i + 1] == '3')
+				wrong_format(vars, &i);
 			if (i == -1)
 				return (0);
 		}
@@ -421,7 +450,7 @@ t_cmd	*parsing_commands(t_vars *vars)
 	i = 0;
 	while (vars->arg_arr && vars->arg_arr[i] && vars->arg_arr[i][0])
 	{
-		temp = add_arg_to_arr(&(vars->arg_arr[1]), NULL, 0);
+		temp = add_arg_to_arr(&(vars->arg_arr[1]), NULL, 0, 0);
 		if (len(vars->arg_arr[0]) == 1 && vars->arg_arr[i][0] == '|')
 			last_command(head)->next = create_command_node(0, 0);
 		else if (arg_isoperator(vars->arg_arr[0]) && vars->arg_arr[0][0] == '<')
@@ -430,7 +459,7 @@ t_cmd	*parsing_commands(t_vars *vars)
 			last_command(head)->next = create_command_node(0, 1);
 		else
 			last_command(head)->command_args = add_arg_to_arr(
-				last_command(head)->command_args, vars->arg_arr, 1);
+				last_command(head)->command_args, vars->arg_arr, 1, 0);
 		free_arr(vars->arg_arr);
 		vars->arg_arr = temp;
 	}
@@ -478,14 +507,14 @@ int	main(int ac, char **av, char **env)
 		line = readline("\nLeak your thoughts > ");
 		printf("\ntest3\n");
 		if (line == NULL)
-			to_exit(NULL);
+			to_exit(NULL, NULL);
 		printf("\ntest4\n");
 		if (line && line[0])
 			add_history(line);
 		printf("\ntest5\n");
 		vars = vars_init(line);
 		printf("\ntest6\n");
-		vars->arg_arr = split_input_words(line);
+		vars->arg_arr = split_input_words(line, vars);
 		if (vars->arg_arr)
 			print_arr(vars->arg_arr);
 		printf("\ntest6.1\n");
@@ -499,11 +528,10 @@ int	main(int ac, char **av, char **env)
 			cmd = parsing_commands(vars);
 			print_cmd(cmd);
 			// ft_putstr_fd(line, 1);
+			free_cmd_all(cmd);
 			printf("\ntest6.3\n");
 		}
-		if (vars)
-			free_vars(vars);
-		vars = NULL;
+		free_vars(vars);
 		printf("\ntest7\n");
 	}
 	return (0);

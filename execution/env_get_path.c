@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   env_get_path.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 21:00:17 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:08:42 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/20 13:40:48 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 char	*find_path_in_env(char **envp)
 {
