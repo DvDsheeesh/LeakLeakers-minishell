@@ -13,7 +13,8 @@ OBJ = $(SRC:.c=.o)
 OBJ2 = $(SRC2:.c=.o)
 
 all: $(OBJ) $(LIBFT)
-	$(CC) $(CFLAGS) -lreadline $(OBJ) $(LIBFT) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline
+# 	$(CC) $(CFLAGS) -lreadline $(OBJ) $(LIBFT) -o $(NAME)
 
 2: $(OBJ2) $(LIBFT)
 	$(CC) $(CFLAGS) -lreadline $(OBJ2) $(LIBFT) -o $(NAME)

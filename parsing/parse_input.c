@@ -478,7 +478,7 @@ int	main(int ac, char **av, char **env)
 		line = readline("\nLeak your thoughts > ");
 		printf("\ntest3\n");
 		if (line == NULL)
-			to_exit(vars);
+			to_exit(NULL);
 		printf("\ntest4\n");
 		if (line && line[0])
 			add_history(line);
@@ -503,6 +503,7 @@ int	main(int ac, char **av, char **env)
 		}
 		if (vars)
 			free_vars(vars);
+		vars = NULL;
 		printf("\ntest7\n");
 	}
 	return (0);
