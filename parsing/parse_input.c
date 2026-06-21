@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/21 21:03:17 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/21 22:06:40 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,39 +134,24 @@ t_cmd	*last_command(t_cmd *lst)
 	return (p);
 }
 
-int	ftpf_putnbr(int n, int i)
-{
-	if (n == -2147483648)
-	{
-		write (1, "-2147483648", 11);
-		return (11);
-	}
-	if (n < 0)
-	{
-		write (1, "-", 1);
-		i++;
-		n *= -1;
-	}
-	if (n > 9)
-		i = ftpf_putnbr(n / 10, i);
-	n = n % 10 + '0';
-	write (1, &n, 1);
-	return (i + 1);
-}
-
-// void	ft_putstr(char	*str)
+// int	ftpf_putnbr(int n, int i)
 // {
-// 	int	i;
-
-// 	i = 0;
-// 	if (!str)
-// 		return ;
-// 	while (str && str[i])
+// 	if (n == -2147483648)
 // 	{
-// 		write(1, &str[i], 1);
-// 		i++;
+// 		write (1, "-2147483648", 11);
+// 		return (11);
 // 	}
-// 	write(1, "\n", 1);
+// 	if (n < 0)
+// 	{
+// 		write (1, "-", 1);
+// 		i++;
+// 		n *= -1;
+// 	}
+// 	if (n > 9)
+// 		i = ftpf_putnbr(n / 10, i);
+// 	n = n % 10 + '0';
+// 	write (1, &n, 1);
+// 	return (i + 1);
 // }
 
 char	*ms_cpy(char *s1)
@@ -196,14 +181,6 @@ char	*extend_arg(char *word, char c)
 	if (!new_word)
 		return (NULL);
 	i = 0;
-	// if (word)
-	// {
-	// 	while (word[i])
-	// 	{
-	// 		new_word[i] = word[i];
-	// 		i++;
-	// 	}
-	// }
 	while (word && word[i])
 	{
 		new_word[i] = word[i];
@@ -275,16 +252,60 @@ char	**special_symbols_parse(char **arg_arr, char *line, char **word, int *i)
 	return (new_arr);
 }
 
-// int	dollar_of_truth(char **line, int i, int from_quote) hi man > this is << testing co|de
-// {
-// 	char	*word;
-// 	int		old_i;
+char	*replace_range(char *line, int start, int end, char *new_word)
+{
+	int		i;
+	int		j;
+	char	*new_line;
 
-// 	old_i = i;
-// 	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_'))
-// 		i++;
+	i = 0;
+	new_line = malloc(len(line) + len(new_word) - (end - start) + 1);
+	while (i < start && line && line[i])
+	{
+		new_line[i] = line[i];
+		i++;
+	}
+	j = 0;
+	while (new_word[j])
+		new_line[i++] = new_word[j++];
+	j = i - len(new_word);
+	while (j < end && line && line[j])
+		j++;
+	while (line && line[j])
+		new_line[i] = line[j];
+	if (line)
+		free(line);
+	return (new_line);
+}
 
-// }
+char	*find_from_env(char *line, int start, int end, t_env *env)
+{
+	char	*word;
+	char	**split_line;
+
+	word = NULL;
+	split_line = NULL;
+	// while (env)
+	// {
+	// 	// if (ft_strncmp(env->var, ))
+	// }
+	return ("");
+}
+
+int	dollar_of_truth(char **line, int i, t_env *env)
+{
+	char	*word;
+	int		start;
+	int		end;
+
+	start = i++;
+	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_')) // replace functions
+		i++;
+	end = i;
+	// replace_range(line, start, end, find_var());
+
+	return (i);
+}
 
 char	**split_input_words(char *line, t_info *vars)
 {
@@ -299,17 +320,13 @@ char	**split_input_words(char *line, t_info *vars)
 			i = join_arg(&(vars->word), line, i + 1, line[i]);
 		else if (line[i] == '$' && line[i + 1] != '$')
 			NULL;
-			// dollar_of_truth
+			// dollar_of_truth ####################################////////////////// hi man > this is << testing co|de
 			// add a function that join_arg until not any of [alpha, num, _]
 		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
-		{
-			if (vars->word)
-				arg_arr = add_arg_to_arr(arg_arr, &(vars->word), 1, 1);
 			arg_arr = special_symbols_parse(arg_arr, line, &(vars->word), &i);
-		}
-		else if (isprint(line[i]) && !isspace(line[i]))
+		else if (isprint(line[i]) && !isspace(line[i])) // replace functions
 			vars->word = extend_arg(vars->word, line[i]);
-		if ((isspace(line[i]) || line[i + 1] == '\0') && vars->word)
+		if ((isspace(line[i]) || line[i + 1] == '\0') && vars->word) // replace functions
 			arg_arr = add_arg_to_arr(arg_arr, &(vars->word), 1, 1);
 		i++;
 	}
@@ -331,17 +348,37 @@ void	print_arr(char **arr)
 	}
 }
 
-t_cmd	*extract_env(char **env)
+t_env	*env_new(void *element)
 {
-	t_cmd	*head;
+	t_env	*new;
+	char	**split_line;
+
+	new = malloc(sizeof(t_env));
+	if (!new)
+		return (NULL);
+	split_line = ft_split(element, '=');	
+	new->var = split_line[0];
+	new->value = split_line[1];
+	new->next = NULL;
+	return (new);
+}
+
+t_env	*env_last(t_env *head)
+{
+	while (head->next)
+		head = head->next;
+	return (head);
+}
+
+t_env	*extract_env(char **env)
+{
+	t_env	*head;
 	int		i;
 
-	head = NULL;
-	(void)env;
-	// head = create_command_node(env[0]);
-	// i = 1;
-	// while (i < arr_len(env))
-	// 	ft_lstadd_back(&head, create_command_node(env[i]));
+	head = env_new(env[0]);
+	i = 1;
+	while (env[i])
+		env_last(head)->next = env_new(env[i++]);
 	return (head);
 }
 
@@ -445,6 +482,7 @@ t_info	*vars_init(char *line, char **env)
 
 	vars = malloc(sizeof(t_info));
 	vars->env = add_arg_to_arr(env, NULL, 0, 0);
+	// vars->env = extract_env(env);
 	vars->arg_arr = NULL;
 	vars->label_arr = NULL;
 	vars->line = line;

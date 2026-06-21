@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/20 17:27:58 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/21 21:48:50 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,12 @@ typedef struct s_commands
 	struct s_commands	*next;
 }	t_cmd;
 
-// typedef struct s_vars
-// {
-// 	// t_list	*env;
-// 	char	*line;
-// 	char	*word;
-// 	char	*label_arr;
-// 	char	**arg_arr;
-// }			t_vars;
+typedef struct s_env
+{
+	char			*var;
+	char			*value;
+	struct s_env	*next;
+}	t_env;
 
 typedef struct s_program_info
 {

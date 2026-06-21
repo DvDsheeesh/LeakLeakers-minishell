@@ -37,7 +37,12 @@ clean:
 
 re: fclean all
 
-rerun: re
+run: all
+	./$(NAME)
+
+vrun:
 	valgrind -s --leak-check=full --track-origins=yes ./minishell
+
+rerun: re vrun
 
 .PHONY: all rerun clean fclean re
