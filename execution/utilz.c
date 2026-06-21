@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   utilz.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:14:42 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/21 20:35:23 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	free_arr(char **arr)
 {
