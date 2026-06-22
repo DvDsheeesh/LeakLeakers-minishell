@@ -7,6 +7,7 @@ LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 SRC =	execution/utilz.c \
+		execution/pipe.c \
 		execution/env_get_path.c \
 		execution/env_utils.c \
 		execution/built_in_exec.c \

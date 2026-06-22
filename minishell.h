@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 21:48:50 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/22 19:40:03 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ typedef struct s_env
 
 typedef struct s_program_info
 {
-	char	**env;
+	t_env	*env;
 	char	*line;
 	char	*word;
 	char	*label_arr;
@@ -71,6 +71,7 @@ int		ft_cd(char **args, t_info *info);
 int		ft_export(char **args, t_info *info);
 int		ft_unset(char **args, t_info *info);
 t_cmd	*parse_line(char *line);
+int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
 char	**env_copy(char **envp);
 void	free_arr(char **arr);
