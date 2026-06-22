@@ -6,31 +6,21 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/20 14:59:11 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/21 22:06:40 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-void	free_arr(char **arr)
-{
-	int	i;
+int g_status = 0;
 
-	i = 0;
-	while (arr && arr[i])
-	{
-		free(arr[i]);
-		arr[i++] = NULL;
-	}
-	if (arr)
-		free(arr);
-	arr = NULL;
-}
-
-void	free_vars(t_vars *vars)
+void	free_vars(t_info *vars)
 {
 	if (vars)
 	{
+		if (vars->env)
+			free_arr(vars->env);
+		vars->env = NULL;
 		if (vars->arg_arr)
 			free_arr(vars->arg_arr);
 		vars->arg_arr = NULL;
@@ -59,10 +49,9 @@ void	free_cmd_all(t_cmd *cmd)
 	if (cmd->next)
 		free_cmd_all(cmd->next);
 	free_cmd(cmd);
-	// free(cmd);
 }
 
-void	free_all(t_vars *vars, t_cmd *cmd)
+void	free_all(t_info *vars, t_cmd *cmd)
 {
 	if (vars)
 		free_vars(vars);
@@ -70,7 +59,7 @@ void	free_all(t_vars *vars, t_cmd *cmd)
 		free_cmd_all(cmd);
 }
 
-void	to_exit(t_vars *vars, t_cmd *cmd)
+void	to_exit(t_info *vars, t_cmd *cmd)
 {
 	free_all(vars, cmd);
 	exit(0);
@@ -84,20 +73,18 @@ void	reset_line(void)
 	rl_redisplay();
 }
 
-void	wrong_format(t_vars *vars, int *i)
+void	wrong_format(t_info *vars, int *i)
 {
 	write(1, "\n", 1);
 	ft_putstr_fd("** invalid syntax **\n", 1);
 	*i = -1;
-	// free_vars(vars);
-	// reset_line();
 }
 
 void	inline_signal(int sig)
 {
 	(void)sig;
 	reset_line();
-	// g_sig_status = 130;
+	g_status = 130;
 }
 
 int	len(char *str)
@@ -147,39 +134,24 @@ t_cmd	*last_command(t_cmd *lst)
 	return (p);
 }
 
-int	ftpf_putnbr(int n, int i)
-{
-	if (n == -2147483648)
-	{
-		write (1, "-2147483648", 11);
-		return (11);
-	}
-	if (n < 0)
-	{
-		write (1, "-", 1);
-		i++;
-		n *= -1;
-	}
-	if (n > 9)
-		i = ftpf_putnbr(n / 10, i);
-	n = n % 10 + '0';
-	write (1, &n, 1);
-	return (i + 1);
-}
-
-// void	ft_putstr(char	*str)
+// int	ftpf_putnbr(int n, int i)
 // {
-// 	int	i;
-
-// 	i = 0;
-// 	if (!str)
-// 		return ;
-// 	while (str && str[i])
+// 	if (n == -2147483648)
 // 	{
-// 		write(1, &str[i], 1);
-// 		i++;
+// 		write (1, "-2147483648", 11);
+// 		return (11);
 // 	}
-// 	write(1, "\n", 1);
+// 	if (n < 0)
+// 	{
+// 		write (1, "-", 1);
+// 		i++;
+// 		n *= -1;
+// 	}
+// 	if (n > 9)
+// 		i = ftpf_putnbr(n / 10, i);
+// 	n = n % 10 + '0';
+// 	write (1, &n, 1);
+// 	return (i + 1);
 // }
 
 char	*ms_cpy(char *s1)
@@ -209,14 +181,6 @@ char	*extend_arg(char *word, char c)
 	if (!new_word)
 		return (NULL);
 	i = 0;
-	// if (word)
-	// {
-	// 	while (word[i])
-	// 	{
-	// 		new_word[i] = word[i];
-	// 		i++;
-	// 	}
-	// }
 	while (word && word[i])
 	{
 		new_word[i] = word[i];
@@ -272,72 +236,98 @@ char	**add_arg_to_arr(char **arg_arr, char **word,
 	return (new_arr);
 }
 
-char	**special_symbols_parse(char **arg_arr, char *line, int *i)
+char	**special_symbols_parse(char **arg_arr, char *line, char **word, int *i)
 {
-	char	*word;
+	// char	*word;
 	char	**new_arr;
 
-	// word = extend_arg(word, line[*i]);
-	// if (line[*i + 1] == line[*i] && line[*i] != '|')
-	// 	word = extend_arg(word, line[(*i)++]);
-	// new_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
-	// free(word);
-	// free_arr(arg_arr);
-	// (*i)++;
-
-	word = extend_arg(word, line[*i]);
+	// word = NULL;
+	if (*word)
+		arg_arr = add_arg_to_arr(arg_arr, word, 1, 1);
+	*word = extend_arg(*word, line[*i]);
 	if (line[(*i) + 1] == line[*i]
 		&& (line[*i] == '<' || line[*i] == '>'))
-		word = extend_arg(word, line[(*i)++]);
-	new_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
-
+		*word = extend_arg(*word, line[(*i)++]);
+	new_arr = add_arg_to_arr(arg_arr, word, 1, 1);
 	return (new_arr);
 }
 
-// int	dollar_of_truth(char **line, int i, int from_quote)
-// {
-// 	char	*word;
-// 	int		old_i;
-
-// 	old_i = i;
-// 	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_'))
-// 		i++;
-
-// }
-
-char	**split_input_words(char *line, t_vars *vars)
+char	*replace_range(char *line, int start, int end, char *new_word)
 {
 	int		i;
+	int		j;
+	char	*new_line;
+
+	i = 0;
+	new_line = malloc(len(line) + len(new_word) - (end - start) + 1);
+	while (i < start && line && line[i])
+	{
+		new_line[i] = line[i];
+		i++;
+	}
+	j = 0;
+	while (new_word[j])
+		new_line[i++] = new_word[j++];
+	j = i - len(new_word);
+	while (j < end && line && line[j])
+		j++;
+	while (line && line[j])
+		new_line[i] = line[j];
+	if (line)
+		free(line);
+	return (new_line);
+}
+
+char	*find_from_env(char *line, int start, int end, t_env *env)
+{
 	char	*word;
+	char	**split_line;
+
+	word = NULL;
+	split_line = NULL;
+	// while (env)
+	// {
+	// 	// if (ft_strncmp(env->var, ))
+	// }
+	return ("");
+}
+
+int	dollar_of_truth(char **line, int i, t_env *env)
+{
+	char	*word;
+	int		start;
+	int		end;
+
+	start = i++;
+	while ((*line)[i] && (isalnum((*line)[i]) || (*line)[i] == '_')) // replace functions
+		i++;
+	end = i;
+	// replace_range(line, start, end, find_var());
+
+	return (i);
+}
+
+char	**split_input_words(char *line, t_info *vars)
+{
+	int		i;
 	char	**arg_arr;
 
 	i = 0;
-	word = NULL;
 	arg_arr = NULL;
 	while (line && line[i])
 	{
 		if (line[i] == '"' || line[i] == '\'')
-			i = join_arg(&word, line, i + 1, line[i]);
+			i = join_arg(&(vars->word), line, i + 1, line[i]);
 		else if (line[i] == '$' && line[i + 1] != '$')
 			NULL;
-			// dollar_of_truth
+			// dollar_of_truth ####################################////////////////// hi man > this is << testing co|de
 			// add a function that join_arg until not any of [alpha, num, _]
 		else if (line[i] == '<' || line[i] == '>' || line[i] == '|')
-		{
-			if (word)
-				arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
-			// TODO: fix this function
-			// arg_arr = special_symbols_parse(arg_arr, line, &i);
-			word = extend_arg(word, line[i]);
-			if (line[i + 1] == line[i]
-				&& (line[i] == '<' || line[i] == '>'))
-				word = extend_arg(word, line[i++]);
-			arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
-		}
-		else if (isprint(line[i]) && !isspace(line[i]))
-			word = extend_arg(word, line[i]);
-		if ((isspace(line[i]) || line[i + 1] == '\0') && word)
-			arg_arr = add_arg_to_arr(arg_arr, &word, 1, 1);
+			arg_arr = special_symbols_parse(arg_arr, line, &(vars->word), &i);
+		else if (isprint(line[i]) && !isspace(line[i])) // replace functions
+			vars->word = extend_arg(vars->word, line[i]);
+		if ((isspace(line[i]) || line[i + 1] == '\0') && vars->word) // replace functions
+			arg_arr = add_arg_to_arr(arg_arr, &(vars->word), 1, 1);
 		i++;
 	}
 	return (arg_arr);
@@ -358,17 +348,37 @@ void	print_arr(char **arr)
 	}
 }
 
-t_cmd	*extract_env(char **env)
+t_env	*env_new(void *element)
 {
-	t_cmd	*head;
+	t_env	*new;
+	char	**split_line;
+
+	new = malloc(sizeof(t_env));
+	if (!new)
+		return (NULL);
+	split_line = ft_split(element, '=');	
+	new->var = split_line[0];
+	new->value = split_line[1];
+	new->next = NULL;
+	return (new);
+}
+
+t_env	*env_last(t_env *head)
+{
+	while (head->next)
+		head = head->next;
+	return (head);
+}
+
+t_env	*extract_env(char **env)
+{
+	t_env	*head;
 	int		i;
 
-	head = NULL;
-	(void)env;
-	// head = create_command_node(env[0]);
-	// i = 1;
-	// while (i < arr_len(env))
-	// 	ft_lstadd_back(&head, create_command_node(env[i]));
+	head = env_new(env[0]);
+	i = 1;
+	while (env[i])
+		env_last(head)->next = env_new(env[i++]);
 	return (head);
 }
 
@@ -386,7 +396,7 @@ int	arg_isoperator(char *str)
 	return (1);
 }
 
-char	*labelizing(t_vars *vars)
+char	*labelizing(t_info *vars)
 {
 	char	*label_arr;
 	int		i;
@@ -407,7 +417,7 @@ char	*labelizing(t_vars *vars)
 	return (label_arr);
 }
 
-int	validate_label(t_vars *vars)
+int	validate_label(t_info *vars)
 {
 	int	i;
 
@@ -432,7 +442,7 @@ int	validate_label(t_vars *vars)
 	return (1);
 }
 
-// char	**move_word(t_vars *vars, t_cmd *list)
+// char	**move_word(t_info *vars, t_cmd *list)
 // {
 // 	char	**temp;
 
@@ -440,7 +450,7 @@ int	validate_label(t_vars *vars)
 // 	return (list->content);
 // }
 
-t_cmd	*parsing_commands(t_vars *vars)
+t_cmd	*parsing_commands(t_info *vars)
 {
 	t_cmd	*head;
 	char	**temp;
@@ -466,15 +476,18 @@ t_cmd	*parsing_commands(t_vars *vars)
 	return (head);
 }
 
-t_vars	*vars_init(char *line)
+t_info	*vars_init(char *line, char **env)
 {
-	t_vars	*vars;
+	t_info	*vars;
 
-	vars = malloc(sizeof(t_vars));
+	vars = malloc(sizeof(t_info));
+	vars->env = add_arg_to_arr(env, NULL, 0, 0);
+	// vars->env = extract_env(env);
 	vars->arg_arr = NULL;
 	vars->label_arr = NULL;
 	vars->line = line;
 	vars->word = NULL;
+	vars->exit_status = 0;
 	return (vars);
 }
 
@@ -487,52 +500,44 @@ void	print_cmd(t_cmd *cmd)
 		cmd = cmd->next;
 	}
 }
+void	set_signals(void)
+{
+	signal(SIGINT, inline_signal);
+	signal(SIGQUIT, SIG_IGN);
+}
+
+int	command_process(t_info *vars)
+{
+	t_cmd	*cmd;
+
+	cmd = parsing_commands(vars);
+	g_status = execute(cmd, vars);
+	free_cmd_all(cmd);
+	return (g_status);
+}
 
 int	main(int ac, char **av, char **env)
 {
-	t_vars	*vars;
+	t_info	*vars;
 	char	*line;
-	t_cmd	*cmd;
 
 	(void)ac;
 	(void)av;
 	line = NULL;
-	vars = NULL;
 	while (1)
 	{
-		printf("\ntest1\n");
-		signal(SIGINT, inline_signal);
-		signal(SIGQUIT, SIG_IGN);
-		printf("\ntest2\n");
+		set_signals();
 		line = readline("\nLeak your thoughts > ");
-		printf("\ntest3\n");
 		if (line == NULL)
 			to_exit(NULL, NULL);
-		printf("\ntest4\n");
 		if (line && line[0])
 			add_history(line);
-		printf("\ntest5\n");
-		vars = vars_init(line);
-		printf("\ntest6\n");
+		vars = vars_init(line, env);
 		vars->arg_arr = split_input_words(line, vars);
-		if (vars->arg_arr)
-			print_arr(vars->arg_arr);
-		printf("\ntest6.1\n");
-		// TODO: add a function that assign labels to words
 		vars->label_arr = labelizing(vars);
-		printf("\ntest6.2\n");
-		// TODO: add a validation function based on the labels
 		if (validate_label(vars))
-		{
-			// TODO: add a parsing function that split each command in a node in a linked list
-			cmd = parsing_commands(vars);
-			print_cmd(cmd);
-			// ft_putstr_fd(line, 1);
-			free_cmd_all(cmd);
-			printf("\ntest6.3\n");
-		}
+			command_process(vars);
 		free_vars(vars);
-		printf("\ntest7\n");
 	}
 	return (0);
 }
