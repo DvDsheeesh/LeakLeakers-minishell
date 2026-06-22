@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:40 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 19:16:47 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/22 21:02:41 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ t_cmd	*parse_line(char *line)
 	t_cmd	*head;
 	t_cmd	*tail;
 	t_cmd	*node;
+	t_cmd	*p;
 	char	*seg;
 
 	if (!line || !*line)
@@ -89,6 +90,12 @@ t_cmd	*parse_line(char *line)
 		else
 			tail->next = node;
 		tail = node;
+	}
+	p = head;
+	while (p)
+	{
+		printf("\n%d, %d\n", p->infile, p->outfile);
+		while ()
 	}
 	return (head);
 }

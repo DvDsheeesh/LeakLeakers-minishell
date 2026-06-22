@@ -1,7 +1,9 @@
+all_exec.c
 execution
-ff.c
+fff
+H5
 libft
 makefile
-minishell
 minishell.h
 parsing
+re.c

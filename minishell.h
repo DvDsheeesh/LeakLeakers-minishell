@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 19:40:03 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/22 20:36:44 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,8 @@ typedef struct s_env
 
 typedef struct s_program_info
 {
-	t_env	*env;
+	// t_env	*env;
+	char	**env;
 	char	*line;
 	char	*word;
 	char	*label_arr;

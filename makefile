@@ -7,7 +7,6 @@ LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 SRC =	execution/utilz.c \
-		execution/pipe.c \
 		execution/env_get_path.c \
 		execution/env_utils.c \
 		execution/built_in_exec.c \
@@ -16,9 +15,10 @@ SRC =	execution/utilz.c \
 		execution/builtins_cd.c \
 		execution/builtins_exit.c \
 		execution/builtins_unset.c \
-		execution/parser.c \
 		execution/executor.c \
+		execution/pipe.c \
 		parsing/parse_input.c
+# 		execution/parser.c
 
 OBJ = $(SRC:.c=.o)
 

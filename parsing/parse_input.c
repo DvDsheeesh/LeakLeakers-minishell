@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/22 19:40:36 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/22 20:43:29 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -482,7 +482,7 @@ t_info	*vars_init(char *line, char **env)
 
 	vars = malloc(sizeof(t_info));
 	vars->env = add_arg_to_arr(env, NULL, 0, 0);
-	vars->env = extract_env(env);
+	// vars->env = extract_env(env);
 	vars->arg_arr = NULL;
 	vars->label_arr = NULL;
 	vars->line = line;
@@ -511,7 +511,7 @@ int	command_process(t_info *vars)
 	t_cmd	*cmd;
 
 	cmd = parsing_commands(vars);
-	// g_status = execute(cmd, vars);
+	g_status = execute(cmd, vars);
 	free_cmd_all(cmd);
 	return (g_status);
 }
@@ -520,7 +520,7 @@ int	main(int ac, char **av, char **env)
 {
 	t_info	*vars;
 	char	*line;
-	t_env	*enn;
+	// t_env	*enn;
 
 	(void)ac;
 	(void)av;
@@ -534,12 +534,12 @@ int	main(int ac, char **av, char **env)
 		if (line && line[0])
 			add_history(line);
 		vars = vars_init(line, env);
-		enn = vars->env;
-		while (enn)
-		{
-			printf("%s: %s\n\n", enn->var, enn->value);
-			enn = enn->next;
-		}
+		// enn = vars->env;
+		// while (enn)
+		// {
+		// 	printf("%s: %s\n\n", enn->var, enn->value);
+		// 	enn = enn->next;
+		// }
 		vars->arg_arr = split_input_words(line, vars);
 		vars->label_arr = labelizing(vars);
 		if (validate_label(vars))
