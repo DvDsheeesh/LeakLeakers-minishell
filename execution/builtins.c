@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:08:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 00:15:09 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,16 +67,17 @@ int	ft_pwd(void)
 	return (0);
 }
 
-int	ft_env(char **env)
+int	ft_env(t_env *env)
 {
-	int	i;
-
-	i = 0;
-	while (env[i])
+	while (env)
 	{
-		if (ft_strchr(env[i], '='))
-			ft_putendl_fd(env[i], 1);
-		i++;
+		if (env->value)
+		{
+			ft_putstr_fd(env->var, 1);
+			write(1, "=", 1);
+			ft_putendl_fd(env->value, 1);
+		}
+		env = env->next;
 	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 00:15:41 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int pw)
 {
 	char	*path;
+	char	**envp;
 
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
@@ -53,7 +54,9 @@ static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int pw)
 		ft_putendl_fd(": command not found", 2);
 		exit(127);
 	}
-	execve(path, cmd->command_args, info->env);
+	envp = env_to_arr(info->env);
+	execve(path, cmd->command_args, envp);
+	free_arr(envp);
 	free(path);
 	exit(1);
 }

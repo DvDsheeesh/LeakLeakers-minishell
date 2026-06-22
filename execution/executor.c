@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 00:15:19 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ static int	exec_builtin_redir(t_cmd *cmd, t_info *info)
 
 static void	child_process(t_cmd *cmd, t_info *info, char *path)
 {
+	char	**envp;
+
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 	if (cmd->infile != -1)
@@ -47,7 +49,9 @@ static void	child_process(t_cmd *cmd, t_info *info, char *path)
 		dup2(cmd->outfile, STDOUT_FILENO);
 		close(cmd->outfile);
 	}
-	execve(path, cmd->command_args, info->env);
+	envp = env_to_arr(info->env);
+	execve(path, cmd->command_args, envp);
+	free_arr(envp);
 	ft_putstr_fd("minishell: ", 2);
 	ft_putstr_fd(cmd->command_args[0], 2);
 	ft_putendl_fd(": execve failed", 2);

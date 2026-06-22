@@ -51,7 +51,7 @@ int	ft_exit(char **args, t_info *info)
 	}
 	else
 		code = ft_atoi(args[1]) & 255;
-	free_arr(info->env);
+	free_env(info->env);
 	rl_clear_history();
 	exit(code);
 }

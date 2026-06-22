@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:50:01 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 00:14:49 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static int	cd_error(char *path)
 	return (1);
 }
 
-static char	*cd_get_target(char **args, char **env)
+static char	*cd_get_target(char **args, t_env *env)
 {
 	char	*target;
 
