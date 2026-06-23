@@ -16,7 +16,6 @@ SRC =	execution/utilz.c \
 		execution/builtins_cd.c \
 		execution/builtins_exit.c \
 		execution/builtins_unset.c \
-		execution/parser.c \
 		execution/executor.c \
 		parsing/parse_input.c
 
@@ -42,7 +41,7 @@ run: all
 	./$(NAME)
 
 vrun:
-	valgrind -s --leak-check=full --track-origins=yes ./minishell
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --trace-children=yes ./minishell
 
 rerun: re vrun
 

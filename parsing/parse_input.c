@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/22 19:40:36 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/23 21:58:15 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	free_vars(t_info *vars)
 
 void	reset_line(void)
 {
-	write(1, "\n", 1);
+	write(1, "\n", 2);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
@@ -66,7 +66,7 @@ void	set_signals(void)
 
 int	wrong_format(int *i)
 {
-	write(1, "\n", 1);
+	// write(1, "\n", 1);
 	ft_putstr_fd("** invalid syntax **\n", 1);
 	*i = -1;
 	return (0);
@@ -245,7 +245,13 @@ static char	*replace_range(char *line, int start, int end, char *new_word)
 	return (new_line);
 }
 
-int	dollar_of_truth(char **line, int i, t_env *env)
+int	dollar_exit(char **line, int start, t_info *vars)
+{
+	*line = replace_range(*line, start, start + 2, ft_itoa(vars->exit_status));
+	return (start);
+}
+
+int	dollar_of_truth(char **line, t_info *vars, int i)
 {
 	int		start;
 	int		end;
@@ -253,6 +259,8 @@ int	dollar_of_truth(char **line, int i, t_env *env)
 	char	*value;
 
 	start = i++;
+	if ((*line)[i] == '?')
+		return (dollar_exit(line, start, vars));
 	while ((*line)[i]
 		&& (ft_isalnum((*line)[i]) || (*line)[i] == '_'))
 		i++;
@@ -262,7 +270,7 @@ int	dollar_of_truth(char **line, int i, t_env *env)
 	var_name = ft_substr(*line, start + 1, end - start - 1);
 	if (!var_name)
 		return (end);
-	value = env_get(env, var_name);
+	value = env_get(vars->env, var_name);
 	free(var_name);
 	if (!value)
 		value = "";
@@ -271,6 +279,12 @@ int	dollar_of_truth(char **line, int i, t_env *env)
 }
 
 /* ── tokenizer ────────────────────────────────────────────────────────────── */
+
+int	is_var_name(char c, char *mline, int i)
+{
+	return (ft_isalnum(mline[i + 1]) || mline[i + 1] == '_'
+		|| mline[i + 1] == '?');
+}
 
 char	**split_input_words(char *line, t_info *vars)
 {
@@ -288,14 +302,13 @@ char	**split_input_words(char *line, t_info *vars)
 		if (mline[i] == '"' || mline[i] == '\'')
 			i = join_arg(&(vars->word), mline, i + 1, mline[i]);
 		else if (mline[i] == '$' && mline[i + 1] != '$'
-			&& (ft_isalnum(mline[i + 1]) || mline[i + 1] == '_'))
+			&& is_var_name(mline[i + 1], mline, i))
 		{
-			i = dollar_of_truth(&mline, i, vars->env);
+			i = dollar_of_truth(&mline, vars, i);
 			continue ;
 		}
 		else if (mline[i] == '<' || mline[i] == '>' || mline[i] == '|')
-			arg_arr = special_symbols_parse(arg_arr, mline,
-					&(vars->word), &i);
+			arg_arr = special_symbols_parse(arg_arr, mline, &(vars->word), &i);
 		else if (ft_isprint(mline[i]) && mline[i] != ' ' && mline[i] != '\t')
 			vars->word = ms_extend(vars->word, mline[i]);
 		if ((mline[i] == ' ' || mline[i] == '\t' || mline[i + 1] == '\0')
@@ -532,7 +545,7 @@ int	main(int ac, char **av, char **env)
 	while (1)
 	{
 		set_signals();
-		line = readline("\nLeak your thoughts > ");
+		line = readline("minishell$");
 		if (line == NULL)
 		{
 			free_vars(vars);
