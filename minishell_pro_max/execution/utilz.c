@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilz.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 19:16:50 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/24 21:59:28 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ static int	open_redir_in(t_cmd *cmd, t_redir *r, t_info *info)
 
 	if (r->type == REDIR_HEREDOC)
 	{
-		fd = handle_heredoc(r->file, info->env);
+		fd = handle_heredoc(r->file, info, cmd);
 		if (fd == -1)
 			return (1);
 	}

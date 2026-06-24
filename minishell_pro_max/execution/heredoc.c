@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 00:00:00 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/23 00:00:00 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 22:38:36 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ static void	heredoc_write(int fd, char *line, t_env *env)
 	free(expanded);
 }
 
-static void	heredoc_child(char *delim, int write_fd, t_env *env)
+static void	heredoc_child(char *delim, int write_fd, t_info *info, t_cmd *cmd)
 {
 	char	*line;
 	int		dlen;
@@ -64,10 +64,12 @@ static void	heredoc_child(char *delim, int write_fd, t_env *env)
 			free(line);
 			break ;
 		}
-		heredoc_write(write_fd, line, env);
+		heredoc_write(write_fd, line, info->env);
 		free(line);
 	}
 	close(write_fd);
+	free_vars(info);
+	free_cmds(cmd);
 	exit(0);
 }
 
@@ -87,7 +89,7 @@ static int	heredoc_parent(int *pipefd, pid_t pid)
 	return (pipefd[0]);
 }
 
-int	handle_heredoc(char *delim, t_env *env)
+int	handle_heredoc(char *delim, t_info *info, t_cmd *cmd)
 {
 	int		pipefd[2];
 	pid_t	pid;
@@ -102,6 +104,9 @@ int	handle_heredoc(char *delim, t_env *env)
 		return (-1);
 	}
 	if (pid == 0)
-		heredoc_child(delim, pipefd[1], env);
+	{
+		close(pipefd[0]);
+		heredoc_child(delim, pipefd[1], info, cmd);
+	}
 	return (heredoc_parent(pipefd, pid));
 }

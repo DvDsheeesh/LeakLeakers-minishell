@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 21:01:40 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/23 23:11:09 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 20:56:23 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static int	is_numeric(char *str)
 int	ft_exit(char **args, t_info *info)
 {
 	int	code;
-
+	
 	ft_putendl_fd("exit", 1);
 	if (!args[1])
 		code = info->exit_status;
@@ -51,7 +51,7 @@ int	ft_exit(char **args, t_info *info)
 	}
 	else
 		code = ft_atoi(args[1]) & 255;
-	free_env(info->env);
+	free_vars(info);
 	rl_clear_history();
 	exit(code);
 }

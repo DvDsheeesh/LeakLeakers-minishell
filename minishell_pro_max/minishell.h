@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 11:12:13 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/24 22:00:23 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ typedef struct s_program_info
 	int		exit_status;
 }	t_info;
 
+void	free_vars(t_info *vars);
 void	free_cmds(t_cmd *cmds);
 
 /* env linked list */
@@ -88,7 +89,7 @@ char	*search_in_paths(char **paths, char *cmd);
 t_redir	*new_redir(t_redir_type type, char *file);
 void	free_redirs(t_redir *redirs);
 int		open_redirections(t_cmd *cmds, t_info *info);
-int		handle_heredoc(char *delim, t_env *env);
+int		handle_heredoc(char *delim, t_info *info, t_cmd *cmd);
 
 /* builtins */
 int		is_builtin(char *cmd);

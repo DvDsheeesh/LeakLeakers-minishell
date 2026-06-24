@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 10:33:08 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/24 22:20:19 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int pw)
 	char	*path;
 	char	**envp;
 
-	signal(SIGINT, SIG_DFL);
+	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_DFL);
 	pipe_child_io(cmd, prev, pw);
 	if (!cmd->command_args || !cmd->command_args[0])
