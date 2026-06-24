@@ -3,105 +3,109 @@
 /*                                                        :::      ::::::::   */
 /*   env_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:55:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:06:28 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 11:06:18 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-static int	env_find_idx(char **env, char *key, int klen)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], key, klen) == 0
-			&& (env[i][klen] == '=' || env[i][klen] == '\0'))
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-char	*env_get(char **env, char *key)
+char	*env_get(t_env *env, char *key)
 {
 	int	klen;
-	int	i;
 
 	klen = ft_strlen(key);
-	i = 0;
-	while (env[i])
+	while (env)
 	{
-		if (ft_strncmp(env[i], key, klen) == 0 && env[i][klen] == '=')
-			return (env[i] + klen + 1);
-		i++;
+		if (ft_strncmp(env->var, key, klen) == 0 && env->var[klen] == '\0')
+			return (env->value);
+		env = env->next;
 	}
 	return (NULL);
 }
 
-static int	env_append(t_info *info, char *entry)
+static t_env	*env_new_node(char *key, char *val)
 {
-	int		size;
-	char	**new_env;
+	t_env	*node;
 
-	size = 0;
-	while (info->env[size])
-		size++;
-	new_env = malloc(sizeof(char *) * (size + 2));
-	if (!new_env)
+	node = malloc(sizeof(t_env));
+	if (!node)
+		return (NULL);
+	node->var = ft_strdup(key);
+	if (val)
+		node->value = ft_strdup(val);
+	else
+		node->value = NULL;
+	node->next = NULL;
+	if (!node->var)
+	{
+		free(node->value);
+		free(node);
+		return (NULL);
+	}
+	return (node);
+}
+
+// void	set_process()
+// {
+	
+// }
+
+int	env_set(t_info *info, char *key, char *val)
+{
+	t_env	*cur;
+	t_env	*node;
+
+	cur = info->env;
+	while (cur)
+	{
+		if (ft_strncmp(cur->var, key, ft_strlen(key) + 1) == 0)
+		{
+			free(cur->value);
+			cur->value = val ? ft_strdup(val) : NULL;
+			return (0);
+		}
+		cur = cur->next;
+	}
+	node = env_new_node(key, val);
+	if (!node)
 		return (1);
-	ft_memcpy(new_env, info->env, sizeof(char *) * size);
-	new_env[size] = ft_strdup(entry);
-	new_env[size + 1] = NULL;
-	if (!new_env[size])
-		return (free(new_env), 1);
-	free(info->env);
-	info->env = new_env;
+	if (!info->env)
+	{
+		info->env = node;
+		return (0);
+	}
+	cur = info->env;
+	while (cur->next)
+		cur = cur->next;
+	cur->next = node;
 	return (0);
 }
 
 int	env_update(t_info *info, char *entry)
 {
 	char	*eq;
-	int		klen;
-	int		idx;
+	char	*key;
+	char	*val;
+	int		ret;
 
 	eq = ft_strchr(entry, '=');
 	if (eq)
-		klen = (int)(eq - entry);
-	else
-		klen = (int)ft_strlen(entry);
-	idx = env_find_idx(info->env, entry, klen);
-	if (idx >= 0)
 	{
-		free(info->env[idx]);
-		info->env[idx] = ft_strdup(entry);
-		return (!info->env[idx]);
+		key = ft_substr(entry, 0, eq - entry);
+		val = ft_strdup(eq + 1);
 	}
-	return (env_append(info, entry));
-}
-
-int	env_set(t_info *info, char *key, char *val)
-{
-	char	*tmp;
-	char	*entry;
-	int		ret;
-
-	tmp = ft_strjoin(key, "=");
-	if (!tmp)
-		return (1);
-	if (val)
-		entry = ft_strjoin(tmp, val);
 	else
-		entry = ft_strjoin(tmp, "");
-	free(tmp);
-	if (!entry)
+	{
+		key = ft_strdup(entry);
+		val = NULL;
+	}
+	if (!key)
 		return (1);
-	ret = env_update(info, entry);
-	free(entry);
+	ret = env_set(info, key, val);
+	free(key);
+	free(val);
 	return (ret);
 }

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   utilz.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:14:42 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 21:59:28 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	free_arr(char **arr)
 {
@@ -24,33 +24,103 @@ void	free_arr(char **arr)
 	free(arr);
 }
 
-char	**env_copy(char **envp)
+void	free_env(t_env *env)
 {
-	int		len;
-	int		i;
-	char	**copy;
+	t_env	*tmp;
 
-	if (!envp)
-		return (NULL);
-	len = 0;
-	while (envp[len])
-		len++;
-	copy = malloc(sizeof(char *) * (len + 1));
-	if (!copy)
-		return (NULL);
-	i = 0;
-	while (i < len)
+	while (env)
 	{
-		copy[i] = ft_strdup(envp[i]);
-		if (!copy[i])
+		tmp = env->next;
+		free(env->var);
+		free(env->value);
+		free(env);
+		env = tmp;
+	}
+}
+
+t_env	*env_copy(char **envp)
+{
+	t_env	*head;
+	t_env	*cur;
+	t_env	*node;
+	char	*eq;
+	int		i;
+
+	if (!envp || !envp[0])
+		return (NULL);
+	head = NULL;
+	cur = NULL;
+	i = 0;
+	while (envp[i])
+	{
+		node = malloc(sizeof(t_env));
+		if (!node)
+			return (head);
+		eq = ft_strchr(envp[i], '=');
+		if (eq)
 		{
-			free_arr(copy);
-			return (NULL);
+			node->var = ft_substr(envp[i], 0, eq - envp[i]);
+			node->value = ft_strdup(eq + 1);
 		}
+		else
+		{
+			node->var = ft_strdup(envp[i]);
+			node->value = NULL;
+		}
+		node->next = NULL;
+		if (!head)
+			head = node;
+		else
+			cur->next = node;
+		cur = node;
 		i++;
 	}
-	copy[len] = NULL;
-	return (copy);
+	return (head);
+}
+
+char	**env_to_arr(t_env *env)
+{
+	t_env	*cur;
+	char	**arr;
+	char	*tmp;
+	int		n;
+	int		i;
+
+	n = 0;
+	cur = env;
+	while (cur)
+	{
+		n++;
+		cur = cur->next;
+	}
+	arr = malloc(sizeof(char *) * (n + 1));
+	if (!arr)
+		return (NULL);
+	cur = env;
+	i = 0;
+	while (cur)
+	{
+		tmp = ft_strjoin(cur->var, "=");
+		arr[i] = ft_strjoin(tmp, cur->value ? cur->value : "");
+		free(tmp);
+		cur = cur->next;
+		i++;
+	}
+	arr[i] = NULL;
+	return (arr);
+}
+
+void	free_redirs(t_redir *redirs)
+{
+	t_redir	*tmp;
+
+	while (redirs)
+	{
+		tmp = redirs->next;
+		free(redirs->file);
+		free(redirs);
+		redirs = tmp;
+	}
 }
 
 void	free_cmds(t_cmd *cmds)
@@ -61,6 +131,7 @@ void	free_cmds(t_cmd *cmds)
 	{
 		tmp = cmds->next;
 		free_arr(cmds->command_args);
+		free_redirs(cmds->redirs);
 		if (cmds->infile != -1)
 			close(cmds->infile);
 		if (cmds->outfile != -1)
@@ -68,6 +139,71 @@ void	free_cmds(t_cmd *cmds)
 		free(cmds);
 		cmds = tmp;
 	}
+}
+
+static int	open_redir_in(t_cmd *cmd, t_redir *r, t_info *info)
+{
+	int	fd;
+
+	if (r->type == REDIR_HEREDOC)
+	{
+		fd = handle_heredoc(r->file, info, cmd);
+		if (fd == -1)
+			return (1);
+	}
+	else
+	{
+		fd = open(r->file, O_RDONLY);
+		if (fd == -1)
+			return (perror(r->file), 1);
+	}
+	if (cmd->infile != -1)
+		close(cmd->infile);
+	cmd->infile = fd;
+	return (0);
+}
+
+static int	open_redir_out(t_cmd *cmd, t_redir *r)
+{
+	int	fd;
+	int	flags;
+
+	if (r->type == REDIR_APPEND)
+		flags = O_WRONLY | O_CREAT | O_APPEND;
+	else
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
+	fd = open(r->file, flags, 0644);
+	if (fd == -1)
+		return (perror(r->file), 1);
+	if (cmd->outfile != -1)
+		close(cmd->outfile);
+	cmd->outfile = fd;
+	return (0);
+}
+
+int	open_redirections(t_cmd *cmds, t_info *info)
+{
+	t_cmd	*cmd;
+	t_redir	*r;
+
+	cmd = cmds;
+	while (cmd)
+	{
+		r = cmd->redirs;
+		while (r)
+		{
+			if (r->type == REDIR_IN || r->type == REDIR_HEREDOC)
+			{
+				if (open_redir_in(cmd, r, info))
+					return (1);
+			}
+			else if (open_redir_out(cmd, r))
+				return (1);
+			r = r->next;
+		}
+		cmd = cmd->next;
+	}
+	return (0);
 }
 
 void	sort_str_arr(char **arr, int n)

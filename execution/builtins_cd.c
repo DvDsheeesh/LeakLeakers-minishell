@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_cd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 20:50:01 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:45:43 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/23 22:26:19 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 static int	cd_error(char *path)
 {
@@ -21,7 +21,7 @@ static int	cd_error(char *path)
 	return (1);
 }
 
-static char	*cd_get_target(char **args, char **env)
+static char	*cd_get_target(char **args, t_env *env)
 {
 	char	*target;
 
@@ -62,13 +62,19 @@ int	ft_cd(char **args, t_info *info)
 	char	*old;
 
 	if (args[1] && args[2])
-		return (ft_putstr_fd("minishell: cd: too many arguments\n", 2), 1);
+	{
+		ft_putstr_fd("minishell: cd: too many arguments\n", 2);
+		return (1);
+	}
 	target = cd_get_target(args, info->env);
 	if (!target)
 		return (1);
 	old = getcwd(NULL, 0);
 	if (chdir(target) == -1)
-		return (free(old), cd_error(target));
+	{
+		free(old);
+		return (cd_error(target));
+	}
 	cd_update_env(info, old);
 	return (0);
 }

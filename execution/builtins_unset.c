@@ -3,46 +3,46 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_unset.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:05:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:46:45 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 11:02:29 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-static void	unset_shift(char **env, int j)
+void	unset_process(t_info *info, t_env *prev, t_env *cur)
 {
-	while (env[j + 1])
-	{
-		env[j] = env[j + 1];
-		j++;
-	}
-	env[j] = NULL;
+	if (prev)
+		prev->next = cur->next;
+	else
+		info->env = cur->next;
+	free(cur->var);
+	free(cur->value);
+	free(cur);
 }
 
 int	ft_unset(char **args, t_info *info)
 {
-	int	i;
-	int	j;
-	int	klen;
+	t_env	*cur;
+	t_env	*prev;
+	int		i;
 
 	i = 1;
 	while (args[i])
 	{
-		klen = ft_strlen(args[i]);
-		j = 0;
-		while (info->env[j])
+		cur = info->env;
+		prev = NULL;
+		while (cur)
 		{
-			if (ft_strncmp(info->env[j], args[i], klen) == 0
-				&& (info->env[j][klen] == '=' || info->env[j][klen] == '\0'))
+			if (ft_strncmp(cur->var, args[i], ft_strlen(args[i]) + 1) == 0)
 			{
-				free(info->env[j]);
-				unset_shift(info->env, j);
+				unset_process(info, prev, cur);
 				break ;
 			}
-			j++;
+			prev = cur;
+			cur = cur->next;
 		}
 		i++;
 	}

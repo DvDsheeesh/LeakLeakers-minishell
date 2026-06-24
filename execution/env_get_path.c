@@ -3,27 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   env_get_path.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 21:00:17 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:08:42 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-char	*find_path_in_env(char **envp)
+char	*find_path_in_env(t_env *env)
 {
-	int	i;
-
-	if (!envp)
-		return (NULL);
-	i = 0;
-	while (envp[i])
+	while (env)
 	{
-		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
-			return (envp[i] + 5);
-		i++;
+		if (ft_strncmp(env->var, "PATH", 5) == 0)
+			return (env->value);
+		env = env->next;
 	}
 	return (NULL);
 }
@@ -72,7 +67,7 @@ static char	*handle_absolute_path(char *cmd)
 	return (NULL);
 }
 
-char	*get_path(char *cmd, char **envp)
+char	*get_path(char *cmd, t_env *env)
 {
 	char	*path_env;
 	char	**paths;
@@ -81,7 +76,7 @@ char	*get_path(char *cmd, char **envp)
 		return (NULL);
 	if (ft_strchr(cmd, '/'))
 		return (handle_absolute_path(cmd));
-	path_env = find_path_in_env(envp);
+	path_env = find_path_in_env(env);
 	if (!path_env)
 		return (NULL);
 	paths = ft_split(path_env, ':');

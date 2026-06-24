@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   built_in_exec.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/09 20:40:01 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/14 20:11:03 by halbit           ###   ########.fr       */
+/*   Created: 2026/06/09 20:40:11 by halbit            #+#    #+#             */
+/*   Updated: 2026/06/21 00:14:42 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	is_builtin(char *cmd)
 {
