@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/25 22:26:44 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/25 23:08:04 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -569,7 +569,6 @@ static void	reset_vars(t_info *vars)
 
 void	main_loop(char **line, t_info *vars)
 {
-	// set_signals();
 	setup_inline_signals();
 	*line = readline("minishell$");
 	if (g_signal)
@@ -605,8 +604,6 @@ int	main(int ac, char **av, char **env)
 	if (!vars)
 		return (1);
 	while (1)
-	{
 		main_loop(&line, vars);
-	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 22:46:42 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/25 23:07:11 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,15 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 		close(pw);
 }
 
-static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int pw)
+static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int *pw)
 {
 	char	*path;
 	char	**envp;
 
-	signal(SIGINT, SIG_DFL);
+	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_DFL);
-	pipe_child_io(cmd, prev, pw);
+	close (pw[0]);
+	pipe_child_io(cmd, prev, pw[1]);
 	if (!cmd->command_args || !cmd->command_args[0])
 		exit(0);
 	if (is_builtin(cmd->command_args[0]))
@@ -74,7 +75,7 @@ static int	pipe_run_one(t_cmd *cmd, t_info *info, int *prev, pid_t *pid)
 	if (*pid == -1)
 		perror("minishell: fork");
 	if (*pid == 0)
-		pipe_child(cmd, info, *prev, pipefd[1]);
+		pipe_child(cmd, info, *prev, pipefd);
 	if (*prev != -1)
 		close(*prev);
 	if (cmd->infile != -1)
