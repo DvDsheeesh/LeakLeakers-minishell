@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:21:46 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 23:50:02 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ static int	pipe_wait_all(pid_t *pids, int n)
 			if (WIFEXITED(status))
 				ret = WEXITSTATUS(status);
 			else if (WIFSIGNALED(status))
-				ret = 128 + WTERMSIG(status);
+				ret = exit_child(status);
 		}
 		i++;
 	}

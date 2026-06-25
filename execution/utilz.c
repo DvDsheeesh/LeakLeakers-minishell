@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilz.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:07:29 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/25 23:47:26 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,4 +228,13 @@ void	sort_str_arr(char **arr, int n)
 		}
 		i++;
 	}
+}
+
+int	exit_child (int status)
+{
+		if (WTERMSIG(status) == SIGQUIT)
+			write(1, "Quit (core dumped)\n", 19);
+		else if (WTERMSIG(status) == SIGINT)
+			write(1, "\n", 1);
+		return (128 + WTERMSIG(status));
 }

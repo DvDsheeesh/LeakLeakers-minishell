@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:06:35 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/25 23:49:00 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,7 @@ static int	wait_child(pid_t pid)
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
 	else if (WIFSIGNALED(status))
-	{
-		if (WTERMSIG(status) == SIGQUIT)
-			write(1, "Quit (core dumped)\n", 19);
-		else if (WTERMSIG(status) == SIGINT)
-			write(1, "\n", 1);
-		return (128 + WTERMSIG(status));
-	}
+		return (exit_child(status));
 	return (0);
 }
 
