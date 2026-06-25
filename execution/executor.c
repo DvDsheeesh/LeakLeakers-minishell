@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 22:12:41 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void	child_process(t_cmd *cmd, t_info *info, char *path)
 		close(cmd->outfile);
 	}
 	envp = env_to_arr(info->env);
-	execve(path, cmd->command_args, envp);
+	info->exit_status = execve(path, cmd->command_args, envp);
 	free_arr(envp);
 	ft_putstr_fd("minishell: ", 2);
 	ft_putstr_fd(cmd->command_args[0], 2);
@@ -58,11 +58,12 @@ static void	child_process(t_cmd *cmd, t_info *info, char *path)
 	exit(1);
 }
 
-static int	cmd_not_found(char *name)
+static int	cmd_not_found(char *name, t_info *info)
 {
 	ft_putstr_fd("minishell: ", 2);
 	ft_putstr_fd(name, 2);
 	ft_putendl_fd(": command not found", 2);
+	info->exit_status = 127;
 	return (127);
 }
 
@@ -91,7 +92,7 @@ int	execute(t_cmd *cmd, t_info *info)
 		return (exec_builtin_redir(cmd, info));
 	path = get_path(cmd->command_args[0], info->env);
 	if (!path)
-		return (cmd_not_found(cmd->command_args[0]));
+		return (cmd_not_found(cmd->command_args[0], info));
 	pid = fork();
 	if (pid == -1)
 	{

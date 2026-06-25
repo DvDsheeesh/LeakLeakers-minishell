@@ -17,6 +17,7 @@ SRC =	execution/utilz.c \
 		execution/builtins_exit.c \
 		execution/builtins_unset.c \
 		execution/executor.c \
+		execution/heredoc.c \
 		parsing/parse_input.c
 
 OBJ = $(SRC:.c=.o)
