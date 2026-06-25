@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 22:00:23 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ typedef struct s_program_info
 	int		exit_status;
 }	t_info;
 
+void	free_vars(t_info *vars);
+void	free_cmds(t_cmd *cmds);
+
 /* env linked list */
 t_env	*env_copy(char **envp);
 void	free_env(t_env *env);
@@ -82,10 +85,11 @@ char	*get_path(char *cmd, t_env *env);
 char	*find_path_in_env(t_env *env);
 char	*search_in_paths(char **paths, char *cmd);
 
-/* redirections */
+/* redirections + heredoc */
 t_redir	*new_redir(t_redir_type type, char *file);
 void	free_redirs(t_redir *redirs);
-int		open_redirections(t_cmd *cmds);
+int		open_redirections(t_cmd *cmds, t_info *info);
+int		handle_heredoc(char *delim, t_info *info, t_cmd *cmd);
 
 /* builtins */
 int		is_builtin(char *cmd);
@@ -102,6 +106,9 @@ int		ft_unset(char **args, t_info *info);
 t_cmd	*parse_line(char *line);
 int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
+
+/* dollar expansion (parse_input.c) */
+int		dollar_of_truth(char **line, t_info *vars, int i);
 
 /* utilities */
 void	free_arr(char **arr);

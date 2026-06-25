@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_input.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/23 21:58:15 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/24 21:46:05 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,23 @@ static int	join_arg(char **word, char *line, int i, char end_char)
 	return (i);
 }
 
+static int	join_arg_dq(char **word, char **line, t_info *vars, int i)
+{
+	while ((*line)[i] && (*line)[i] != '"')
+	{
+		if ((*line)[i] == '$' && (*line)[i + 1] != '$'
+			&& (ft_isalnum((unsigned char)(*line)[i + 1])
+				|| (*line)[i + 1] == '_' || (*line)[i + 1] == '?'))
+			i = dollar_of_truth(line, vars, i);
+		else
+		{
+			*word = ms_extend(*word, (*line)[i]);
+			i++;
+		}
+	}
+	return (i);
+}
+
 /* ── operator tokenizer ───────────────────────────────────────────────────── */
 
 static char	**special_symbols_parse(char **arg_arr, char *line,
@@ -247,7 +264,13 @@ static char	*replace_range(char *line, int start, int end, char *new_word)
 
 int	dollar_exit(char **line, int start, t_info *vars)
 {
-	*line = replace_range(*line, start, start + 2, ft_itoa(vars->exit_status));
+	char	*code;
+
+	code = ft_itoa(vars->exit_status);
+	if (!code)
+		return (start + 2);
+	*line = replace_range(*line, start, start + 2, code);
+	free(code);
 	return (start);
 }
 
@@ -299,8 +322,10 @@ char	**split_input_words(char *line, t_info *vars)
 	arg_arr = NULL;
 	while (mline && mline[i])
 	{
-		if (mline[i] == '"' || mline[i] == '\'')
-			i = join_arg(&(vars->word), mline, i + 1, mline[i]);
+		if (mline[i] == '\'')
+			i = join_arg(&(vars->word), mline, i + 1, '\'');
+		else if (mline[i] == '"')
+			i = join_arg_dq(&(vars->word), &mline, vars, i + 1);
 		else if (mline[i] == '$' && mline[i + 1] != '$'
 			&& is_var_name(mline[i + 1], mline, i))
 		{
@@ -369,12 +394,14 @@ static int	validate_label(t_info *vars)
 	{
 		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
-			if (i == 0 || i == (int)(ft_strlen(vars->label_arr) - 1))
+			if (i == (int)(ft_strlen(vars->label_arr) - 1))
 				return (wrong_format(&i));
-			else if (vars->label_arr[i - 1] == '2'
-				|| vars->label_arr[i - 1] == '3')
+			if (i == 0 && vars->label_arr[i] == '3')
 				return (wrong_format(&i));
-			else if (vars->label_arr[i + 1] == '2'
+			if (i > 0 && (vars->label_arr[i - 1] == '2'
+					|| vars->label_arr[i - 1] == '3'))
+				return (wrong_format(&i));
+			if (vars->label_arr[i + 1] == '2'
 				|| vars->label_arr[i + 1] == '3')
 				return (wrong_format(&i));
 		}
@@ -439,11 +466,28 @@ static void	append_redir(t_redir **head, t_redir *r)
 	cur->next = r;
 }
 
+int	command_looping(char **arr, t_cmd *last, int i)
+{
+	if (ft_strncmp(arr[i], "|", 2) == 0)
+		last->next = create_command_node();
+	else if (ft_strncmp(arr[i], "<<", 3) == 0 && arr[i + 1])
+		append_redir(&last->redirs, new_redir(REDIR_HEREDOC, arr[++i]));
+	else if (ft_strncmp(arr[i], "<", 2) == 0 && arr[i + 1])
+		append_redir(&last->redirs, new_redir(REDIR_IN, arr[++i]));
+	else if (ft_strncmp(arr[i], ">>", 3) == 0 && arr[i + 1])
+		append_redir(&last->redirs, new_redir(REDIR_APPEND, arr[++i]));
+	else if (ft_strncmp(arr[i], ">", 2) == 0 && arr[i + 1])
+		append_redir(&last->redirs, new_redir(REDIR_OUT, arr[++i]));
+	else
+		last->command_args = add_arg_to_arr(
+				last->command_args, &arr[i], 1, 0);
+	return (i);
+}
+
 static t_cmd	*parsing_commands(t_info *vars)
 {
 	t_cmd		*head;
 	t_cmd		*last;
-	t_redir		*redir;
 	char		**arr;
 	int			i;
 
@@ -453,31 +497,20 @@ static t_cmd	*parsing_commands(t_info *vars)
 	while (arr && arr[i])
 	{
 		last = last_command(head);
-		if (ft_strncmp(arr[i], "|", 2) == 0)
-			last->next = create_command_node();
-		else if (ft_strncmp(arr[i], "<<", 3) == 0 && arr[i + 1])
-		{
-			redir = new_redir(REDIR_HEREDOC, arr[++i]);
-			append_redir(&last->redirs, redir);
-		}
-		else if (ft_strncmp(arr[i], "<", 2) == 0 && arr[i + 1])
-		{
-			redir = new_redir(REDIR_IN, arr[++i]);
-			append_redir(&last->redirs, redir);
-		}
-		else if (ft_strncmp(arr[i], ">>", 3) == 0 && arr[i + 1])
-		{
-			redir = new_redir(REDIR_APPEND, arr[++i]);
-			append_redir(&last->redirs, redir);
-		}
-		else if (ft_strncmp(arr[i], ">", 2) == 0 && arr[i + 1])
-		{
-			redir = new_redir(REDIR_OUT, arr[++i]);
-			append_redir(&last->redirs, redir);
-		}
-		else
-			last->command_args = add_arg_to_arr(
-					last->command_args, &arr[i], 1, 0);
+		i = command_looping(arr, last, i);
+		// if (ft_strncmp(arr[i], "|", 2) == 0)
+		// 	last->next = create_command_node();
+		// else if (ft_strncmp(arr[i], "<<", 3) == 0 && arr[i + 1])
+		// 	append_redir(&last->redirs, new_redir(REDIR_HEREDOC, arr[++i]));
+		// else if (ft_strncmp(arr[i], "<", 2) == 0 && arr[i + 1])
+		// 	append_redir(&last->redirs, new_redir(REDIR_IN, arr[++i]));
+		// else if (ft_strncmp(arr[i], ">>", 3) == 0 && arr[i + 1])
+		// 	append_redir(&last->redirs, new_redir(REDIR_APPEND, arr[++i]));
+		// else if (ft_strncmp(arr[i], ">", 2) == 0 && arr[i + 1])
+		// 	append_redir(&last->redirs, new_redir(REDIR_OUT, arr[++i]));
+		// else
+		// 	last->command_args = add_arg_to_arr(
+		// 			last->command_args, &arr[i], 1, 0);
 		i++;
 	}
 	return (head);
@@ -508,7 +541,7 @@ static int	command_process(t_info *vars)
 	t_cmd	*cmd;
 
 	cmd = parsing_commands(vars);
-	if (open_redirections(cmd))
+	if (open_redirections(cmd, vars))
 	{
 		free_cmds(cmd);
 		return (1);
@@ -532,6 +565,31 @@ static void	reset_vars(t_info *vars)
 	vars->line = NULL;
 }
 
+void	main_loop(char **line, t_info *vars)
+{
+	set_signals();
+	*line = readline("minishell$");
+	if (g_signal)
+	{
+		vars->exit_status = g_signal;
+		g_signal = 0;
+	}
+	if (*line == NULL)
+	{
+		ft_putstr_fd("exit\n", 1);
+		free_vars(vars);
+		exit(0);
+	}
+	if (*line && (*line)[0])
+		add_history(*line);
+	reset_vars(vars);
+	vars->line = *line;
+	vars->arg_arr = split_input_words(*line, vars);
+	vars->label_arr = labelizing(vars);
+	if (validate_label(vars))
+		command_process(vars);
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_info	*vars;
@@ -539,26 +597,28 @@ int	main(int ac, char **av, char **env)
 
 	(void)ac;
 	(void)av;
+	g_signal = 0;
 	vars = vars_init(NULL, env);
 	if (!vars)
 		return (1);
 	while (1)
 	{
-		set_signals();
-		line = readline("minishell$");
-		if (line == NULL)
-		{
-			free_vars(vars);
-			exit(0);
-		}
-		if (line && line[0])
-			add_history(line);
-		reset_vars(vars);
-		vars->line = line;
-		vars->arg_arr = split_input_words(line, vars);
-		vars->label_arr = labelizing(vars);
-		if (validate_label(vars))
-			command_process(vars);
+		main_loop(&line, vars);
+		// set_signals();
+		// line = readline("minishell$");
+		// if (line == NULL)
+		// {
+		// 	free_vars(vars);
+		// 	exit(0);
+		// }
+		// if (line && line[0])
+		// 	add_history(line);
+		// reset_vars(vars);
+		// vars->line = line;
+		// vars->arg_arr = split_input_words(line, vars);
+		// vars->label_arr = labelizing(vars);
+		// if (validate_label(vars))
+		// 	command_process(vars);
 	}
 	return (0);
 }

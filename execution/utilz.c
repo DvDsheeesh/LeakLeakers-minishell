@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilz.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 19:16:50 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/25 21:31:02 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,11 +141,55 @@ void	free_cmds(t_cmd *cmds)
 	}
 }
 
-int	open_redirections(t_cmd *cmds)
+static void close_if_not(int *fds)
+{
+	
+}
+
+static int	open_redir_in(t_cmd *cmd, t_redir *r, t_info *info)
+{
+	int	fd;
+
+	if (r->type == REDIR_HEREDOC)
+	{
+		fd = handle_heredoc(r->file, info, cmd);
+		if (fd == -1)
+			return (1);
+	}
+	else
+	{
+		fd = open(r->file, O_RDONLY);
+		if (fd == -1)
+			return (perror(r->file), 1);
+	}
+	if (cmd->infile != -1)
+		close(cmd->infile);
+	cmd->infile = fd;
+	return (0);
+}
+
+static int	open_redir_out(t_cmd *cmd, t_redir *r)
+{
+	int	fd;
+	int	flags;
+
+	if (r->type == REDIR_APPEND)
+		flags = O_WRONLY | O_CREAT | O_APPEND;
+	else
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
+	fd = open(r->file, flags, 0644);
+	if (fd == -1)
+		return (perror(r->file), 1);
+	if (cmd->outfile != -1)
+		close(cmd->outfile);
+	cmd->outfile = fd;
+	return (0);
+}
+
+int	open_redirections(t_cmd *cmds, t_info *info)
 {
 	t_cmd	*cmd;
 	t_redir	*r;
-	int		fd;
 
 	cmd = cmds;
 	while (cmd)
@@ -153,33 +197,13 @@ int	open_redirections(t_cmd *cmds)
 		r = cmd->redirs;
 		while (r)
 		{
-			if (r->type == REDIR_IN)
+			if (r->type == REDIR_IN || r->type == REDIR_HEREDOC)
 			{
-				fd = open(r->file, O_RDONLY);
-				if (fd == -1)
-					return (perror(r->file), 1);
-				if (cmd->infile != -1)
-					close(cmd->infile);
-				cmd->infile = fd;
+				if (open_redir_in(cmd, r, info))
+					return (1);
 			}
-			else if (r->type == REDIR_OUT)
-			{
-				fd = open(r->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-				if (fd == -1)
-					return (perror(r->file), 1);
-				if (cmd->outfile != -1)
-					close(cmd->outfile);
-				cmd->outfile = fd;
-			}
-			else if (r->type == REDIR_APPEND)
-			{
-				fd = open(r->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
-				if (fd == -1)
-					return (perror(r->file), 1);
-				if (cmd->outfile != -1)
-					close(cmd->outfile);
-				cmd->outfile = fd;
-			}
+			else if (open_redir_out(cmd, r))
+				return (1);
 			r = r->next;
 		}
 		cmd = cmd->next;

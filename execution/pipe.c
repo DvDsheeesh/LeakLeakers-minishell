@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 22:43:48 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,15 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 		close(pw);
 }
 
-static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int pw)
+static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int *pw)
 {
 	char	*path;
 	char	**envp;
 
-	signal(SIGINT, SIG_DFL);
+	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_DFL);
-	pipe_child_io(cmd, prev, pw);
+	close (pw[0]);
+	pipe_child_io(cmd, prev, pw[1]);
 	if (!cmd->command_args || !cmd->command_args[0])
 		exit(0);
 	if (is_builtin(cmd->command_args[0]))
@@ -74,9 +75,13 @@ static int	pipe_run_one(t_cmd *cmd, t_info *info, int *prev, pid_t *pid)
 	if (*pid == -1)
 		perror("minishell: fork");
 	if (*pid == 0)
-		pipe_child(cmd, info, *prev, pipefd[1]);
+		pipe_child(cmd, info, *prev, pipefd);
 	if (*prev != -1)
 		close(*prev);
+	if (cmd->infile != -1)
+		close(cmd->infile);
+	if (cmd->outfile != -1)
+		close(cmd->outfile);
 	if (cmd->next)
 	{
 		close(pipefd[1]);
@@ -91,6 +96,7 @@ static int	pipe_wait_all(pid_t *pids, int n)
 	int	ret;
 	int	i;
 
+	status = 0;
 	ret = 0;
 	i = 0;
 	while (i < n)

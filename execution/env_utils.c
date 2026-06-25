@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:55:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/24 11:06:18 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,10 @@ static t_env	*env_new_node(char *key, char *val)
 	if (!node)
 		return (NULL);
 	node->var = ft_strdup(key);
-	node->value = val ? ft_strdup(val) : NULL;
+	if (val)
+		node->value = ft_strdup(val);
+	else
+		node->value = NULL;
 	node->next = NULL;
 	if (!node->var)
 	{
@@ -44,6 +47,11 @@ static t_env	*env_new_node(char *key, char *val)
 	}
 	return (node);
 }
+
+// void	set_process()
+// {
+	
+// }
 
 int	env_set(t_info *info, char *key, char *val)
 {
