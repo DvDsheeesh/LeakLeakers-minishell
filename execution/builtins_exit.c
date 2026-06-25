@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 21:01:40 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:06:20 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 00:36:46 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static int	is_numeric(char *str)
 int	ft_exit(t_cmd *cmd, t_info *info)
 {
 	int	code;
-	
+
 	ft_putendl_fd("exit", 1);
 	if (!cmd->command_args[1])
 		code = info->exit_status;

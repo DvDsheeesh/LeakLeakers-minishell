@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:48:15 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 00:46:53 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ int		ft_unset(char **args, t_info *info);
 t_cmd	*parse_line(char *line);
 int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
-int		exit_child (int status);
+int		exit_child(int status);
 
 /* dollar expansion (parse_input.c) */
 int		dollar_of_truth(char **line, t_info *vars, int i);

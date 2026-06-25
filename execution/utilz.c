@@ -6,7 +6,7 @@
 /*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:47:26 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 00:47:57 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,11 +230,11 @@ void	sort_str_arr(char **arr, int n)
 	}
 }
 
-int	exit_child (int status)
+int	exit_child(int status)
 {
-		if (WTERMSIG(status) == SIGQUIT)
-			write(1, "Quit (core dumped)\n", 19);
-		else if (WTERMSIG(status) == SIGINT)
-			write(1, "\n", 1);
-		return (128 + WTERMSIG(status));
+	if (WTERMSIG(status) == SIGQUIT)
+		write(1, "Quit (core dumped)\n", 19);
+	else if (WTERMSIG(status) == SIGINT)
+		write(1, "\n", 1);
+	return (128 + WTERMSIG(status));
 }
