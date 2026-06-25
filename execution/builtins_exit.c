@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/11 21:01:40 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 20:56:23 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 17:59:42 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,28 +30,29 @@ static int	is_numeric(char *str)
 	return (1);
 }
 
-int	ft_exit(char **args, t_info *info)
+int	ft_exit(t_cmd *cmd, t_info *info)
 {
 	int	code;
 	
 	ft_putendl_fd("exit", 1);
-	if (!args[1])
+	if (!cmd->command_args[1])
 		code = info->exit_status;
-	else if (!is_numeric(args[1]))
+	else if (!is_numeric(cmd->command_args[1]))
 	{
 		ft_putstr_fd("minishell: exit: ", 2);
-		ft_putstr_fd(args[1], 2);
+		ft_putstr_fd(cmd->command_args[1], 2);
 		ft_putstr_fd(": numeric argument required\n", 2);
 		code = 2;
 	}
-	else if (args[1] && args[2])
+	else if (cmd->command_args[1] && cmd->command_args[2])
 	{
 		ft_putstr_fd("minishell: exit: too many arguments\n", 2);
 		return (1);
 	}
 	else
-		code = ft_atoi(args[1]) & 255;
+		code = ft_atoi(cmd->command_args[1]) & 255;
 	free_vars(info);
+	free_cmds(cmd);
 	rl_clear_history();
 	exit(code);
 }

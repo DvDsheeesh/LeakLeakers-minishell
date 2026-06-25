@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   built_in_exec.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:40:11 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/21 00:14:42 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 18:01:03 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ int	exec_builtin(t_cmd *cmd, t_info *info)
 	if (ft_strncmp(n, "env", 4) == 0)
 		return (ft_env(info->env));
 	if (ft_strncmp(n, "exit", 5) == 0)
-		return (ft_exit(cmd->command_args, info));
+		return (ft_exit(cmd, info));
 	if (ft_strncmp(n, "export", 7) == 0)
 		return (ft_export(cmd->command_args, info));
 	if (ft_strncmp(n, "unset", 6) == 0)
