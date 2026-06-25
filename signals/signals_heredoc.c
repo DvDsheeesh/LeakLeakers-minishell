@@ -3,25 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   signals_heredoc.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kal-haj- <kal-haj-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/18 20:25:29 by kal-haj-          #+#    #+#             */
-/*   Updated: 2026/02/18 21:48:25 by kal-haj-         ###   ########.fr       */
+/*   Created: 2026/06/25 21:34:35 by melshata          #+#    #+#             */
+/*   Updated: 2026/06/25 21:48:09 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	handle_sigint_heredoc(int sig)
+void	sigint_heredoc(int sig)
 {
 	(void)sig;
 	write(1, "\n", 1);
-	g_sig_status = 130;
+	g_signal = 130;
 	close(STDIN_FILENO);
 }
 
-void	setup_heredoc_signals(void)
+void	set_heredoc_sig(void)
 {
-	signal(SIGINT, handle_sigint_heredoc);
+	signal(SIGINT, sigint_heredoc);
 	signal(SIGQUIT, SIG_IGN);
 }

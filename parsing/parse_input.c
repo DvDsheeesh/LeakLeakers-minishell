@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_input.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/16 17:58:29 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/24 21:46:05 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 22:26:44 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,26 +41,26 @@ void	free_vars(t_info *vars)
 
 /* ── signal ───────────────────────────────────────────────────────────────── */
 
-void	reset_line(void)
-{
-	write(1, "\n", 2);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-}
+// void	reset_line(void)
+// {
+// 	write(1, "\n", 2);
+// 	rl_on_new_line();
+// 	rl_replace_line("", 0);
+// 	rl_redisplay();
+// }
 
-void	inline_signal(int sig)
-{
-	(void)sig;
-	reset_line();
-	g_signal = 130;
-}
+// void	inline_signal(int sig)
+// {
+// 	(void)sig;
+// 	reset_line();
+// 	g_signal = 130;
+// }
 
-void	set_signals(void)
-{
-	signal(SIGINT, inline_signal);
-	signal(SIGQUIT, SIG_IGN);
-}
+// void	set_signals(void)
+// {
+// 	signal(SIGINT, inline_signal);
+// 	signal(SIGQUIT, SIG_IGN);
+// }
 
 /* ── string helpers ───────────────────────────────────────────────────────── */
 
@@ -546,8 +546,10 @@ static int	command_process(t_info *vars)
 		free_cmds(cmd);
 		return (1);
 	}
+	setup_execution_signals();
 	vars->exit_status = execute(cmd, vars);
 	free_cmds(cmd);
+	setup_inline_signals();
 	return (vars->exit_status);
 }
 
@@ -567,7 +569,8 @@ static void	reset_vars(t_info *vars)
 
 void	main_loop(char **line, t_info *vars)
 {
-	set_signals();
+	// set_signals();
+	setup_inline_signals();
 	*line = readline("minishell$");
 	if (g_signal)
 	{
@@ -604,21 +607,6 @@ int	main(int ac, char **av, char **env)
 	while (1)
 	{
 		main_loop(&line, vars);
-		// set_signals();
-		// line = readline("minishell$");
-		// if (line == NULL)
-		// {
-		// 	free_vars(vars);
-		// 	exit(0);
-		// }
-		// if (line && line[0])
-		// 	add_history(line);
-		// reset_vars(vars);
-		// vars->line = line;
-		// vars->arg_arr = split_input_words(line, vars);
-		// vars->label_arr = labelizing(vars);
-		// if (validate_label(vars))
-		// 	command_process(vars);
 	}
 	return (0);
 }

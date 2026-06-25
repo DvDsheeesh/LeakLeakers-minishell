@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kal-haj- <kal-haj-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/18 20:25:31 by kal-haj-          #+#    #+#             */
-/*   Updated: 2026/02/18 21:48:28 by kal-haj-         ###   ########.fr       */
+/*   Created: 2026/06/25 21:34:42 by melshata          #+#    #+#             */
+/*   Updated: 2026/06/25 22:13:43 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ void	handle_sigint(int sig)
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
-	g_sig_status = 130;
+	g_signal = 130;
 }
 
-void	setup_interactive_signals(void)
+void	setup_inline_signals(void)
 {
 	signal(SIGINT, handle_sigint);
 	signal(SIGQUIT, SIG_IGN);
@@ -34,7 +34,7 @@ void	setup_execution_signals(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
-void	restore_default_signals(void)
+void	default_signals(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 00:00:00 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 22:38:36 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 21:45:43 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,7 @@ static void	heredoc_child(char *delim, int write_fd, t_info *info, t_cmd *cmd)
 	char	*line;
 	int		dlen;
 
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_IGN);
+	set_heredoc_sig();
 	dlen = ft_strlen(delim);
 	while (1)
 	{

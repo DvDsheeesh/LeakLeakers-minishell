@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 22:12:41 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/25 22:32:14 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,6 @@ static void	child_process(t_cmd *cmd, t_info *info, char *path)
 {
 	char	**envp;
 
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
 	if (cmd->infile != -1)
 	{
 		dup2(cmd->infile, STDIN_FILENO);
@@ -50,6 +48,7 @@ static void	child_process(t_cmd *cmd, t_info *info, char *path)
 		close(cmd->outfile);
 	}
 	envp = env_to_arr(info->env);
+	default_signals();
 	info->exit_status = execve(path, cmd->command_args, envp);
 	free_arr(envp);
 	ft_putstr_fd("minishell: ", 2);
@@ -74,8 +73,14 @@ static int	wait_child(pid_t pid)
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
-	if (WIFSIGNALED(status))
+	else if (WIFSIGNALED(status))
+	{
+		if (WTERMSIG(status) == SIGQUIT)
+			write(1, "Quit (core dumped)\n", 19);
+		else if (WTERMSIG(status) == SIGINT)
+			write(1, "\n", 1);
 		return (128 + WTERMSIG(status));
+	}
 	return (0);
 }
 
