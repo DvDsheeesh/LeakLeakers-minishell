@@ -6,16 +6,16 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 00:07:54 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/26 04:36:28 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 16:10:50 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	wrong_format(int *i)
+int	wrong_format(t_info *vars)
 {
 	ft_putstr_fd("** invalid syntax **\n", 1);
-	*i = -1;
+	vars->exit_status = 2;
 	return (0);
 }
 

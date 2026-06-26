@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:52:22 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 10:29:14 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 18:09:10 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,10 @@ static int	open_redir_in(t_cmd *cmd, t_redir *r, t_info *info)
 	{
 		fd = open(r->file, O_RDONLY);
 		if (fd == -1)
+		{
+			info->exit_status = 1;
 			return (perror(r->file), 1);
+		}
 	}
 	if (cmd->infile != -1)
 		close(cmd->infile);

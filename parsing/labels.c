@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 23:47:18 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/26 04:33:47 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 16:10:56 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,15 +60,15 @@ int	validate_label(t_info *vars)
 		if (vars->label_arr[i] == '2' || vars->label_arr[i] == '3')
 		{
 			if (i == (int)(ft_strlen(vars->label_arr) - 1))
-				return (wrong_format(&i));
+				return (wrong_format(vars));
 			if (i == 0 && vars->label_arr[i] == '3')
-				return (wrong_format(&i));
+				return (wrong_format(vars));
 			if (i > 0 && (vars->label_arr[i - 1] == '2'
 					|| vars->label_arr[i - 1] == '3'))
-				return (wrong_format(&i));
+				return (wrong_format(vars));
 			if (vars->label_arr[i + 1] == '2'
 				|| vars->label_arr[i + 1] == '3')
-				return (wrong_format(&i));
+				return (wrong_format(vars));
 		}
 		i++;
 	}

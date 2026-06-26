@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 23:49:16 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/26 10:31:07 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 19:30:39 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,15 +39,22 @@ static char	*replace_range(char *line, int start, int end, char *new_word)
 	return (new_line);
 }
 
-static int	dollar_exit(char **line, int start, t_info *vars)
+static int	dollar_1char(char **line, int start, t_info *vars)
 {
-	char	*code;
+	char	*alter;
 
-	code = ft_itoa(vars->exit_status);
-	if (!code)
-		return (start + 2);
-	*line = replace_range(*line, start, start + 2, code);
-	free(code);
+	if ((*line)[start + 1] == '?')
+	{
+		alter = ft_itoa(vars->exit_status);
+		if (!alter)
+			return (start + 2);
+		*line = replace_range(*line, start, start + 2, alter);
+		free(alter);
+	}
+	else if ((*line)[start + 1] == '0')
+		*line = replace_range(*line, start, start + 2, "minishell");
+	else
+		*line = replace_range(*line, start, start + 2, "");
 	return (start);
 }
 
@@ -59,8 +66,8 @@ int	dollar_of_truth(char **line, t_info *vars, int i)
 	char	*value;
 
 	start = i++;
-	if ((*line)[i] == '?')
-		return (dollar_exit(line, start, vars));
+	if (((*line)[i] >= '0' && (*line)[i] <= '9') || (*line)[i] == '?')
+		return (dollar_1char(line, start, vars));
 	while ((*line)[i]
 		&& (ft_isalnum((*line)[i]) || (*line)[i] == '_'))
 		i++;
