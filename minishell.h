@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 19:36:45 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 21:37:15 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ int		ft_unset(char **args, t_info *info);
 /* execution */
 int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
+void	no_path(t_cmd *cmd, t_info *info);
 void	close_other_fds(t_cmd *head, t_cmd *cur);
 int		count_cmds(t_cmd *cmd);
 int		exit_child(int status);

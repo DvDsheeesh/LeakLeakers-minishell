@@ -1,6 +1,6 @@
-*This project has been created as part of the 42 curriculum by hashemH5, DvDsheeesh, melshatarat.*
+*This project has been created as part of the 42 curriculum by melshata, halbit.*
 
-# Minishell — As beautiful as a shell
+# Minishell - LeakLeakers
 
 ## Description
 
@@ -27,7 +27,7 @@ The project covers two main areas:
 
 ### Requirements
 
-- GCC compiler
+- CC compiler
 - GNU Make
 - readline library (`libreadline-dev` on Debian/Ubuntu)
 
@@ -68,6 +68,3 @@ Claude Code (claude-sonnet-4-6) was used during this project for the following t
 - **Debugging**: analyzing segfaults and memory errors when execution or parsing produced unexpected behavior
 - **Explaining system calls**: clarifying the exact semantics of `dup2`, `waitpid`, `sigaction`, and heredoc fd management
 - **Code review**: checking edge cases in variable expansion (`$?`, unset variables, variables inside double quotes)
-- **README**: generating this file based on the actual project structure and the subject requirements
-
-All AI-generated suggestions were reviewed, tested, and understood before being integrated into the project.

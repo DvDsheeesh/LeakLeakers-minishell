@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 19:24:08 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 21:36:43 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,7 @@ static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int *pw)
 		exit(exec_builtin(cmd, info, 1));
 	path = get_path(cmd->command_args[0], info->env);
 	if (!path)
-	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(cmd->command_args[0], 2);
-		ft_putendl_fd(": command not found", 2);
-		exit(127);
-	}
+		no_path(cmd, info);
 	envp = env_to_arr(info->env);
 	execve(path, cmd->command_args, envp);
 	free_arr(envp);

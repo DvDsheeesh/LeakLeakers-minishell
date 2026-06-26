@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe_utilz.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 19:24:20 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 21:37:41 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,15 @@ int	count_cmds(t_cmd *cmd)
 		cmd = cmd->next;
 	}
 	return (n);
+}
+
+void	no_path(t_cmd *cmd, t_info *info)
+{
+	ft_putstr_fd("minishell: ", 2);
+	ft_putstr_fd(cmd->command_args[0], 2);
+	ft_putendl_fd(": command not found", 2);
+	free(info->pipe_pids);
+	free_cmds(info->cmds_head);
+	free_vars(info);
+	exit(127);
 }

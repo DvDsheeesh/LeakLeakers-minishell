@@ -6,7 +6,7 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 23:58:52 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/26 03:35:19 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 20:04:51 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,13 @@ char	**add_arg_to_arr(char **arr, char **word,
 
 int	join_arg(char **word, char *line, int i, char end_char)
 {
-	while (line[i] && line[i] != end_char)
+	while (line && line[i] && line[i] != end_char)
 	{
 		*word = ms_extend(*word, line[i]);
 		i++;
 	}
+	if (line && line[i] != end_char)
+		i--;
 	return (i);
 }
 
@@ -66,5 +68,7 @@ int	join_arg_dq(char **word, char **line, t_info *vars, int i)
 			i++;
 		}
 	}
+	if ((*line) && (*line)[i] != '"')
+		i--;
 	return (i);
 }
