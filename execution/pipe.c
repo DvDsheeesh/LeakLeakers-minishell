@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 18:04:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 17:43:30 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 19:24:08 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 	{
 		dup2(cmd->infile, STDIN_FILENO);
 		close(cmd->infile);
+		cmd->infile = -1;
 	}
 	else if (prev != -1)
 		dup2(prev, STDIN_FILENO);
@@ -25,6 +26,7 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 	{
 		dup2(cmd->outfile, STDOUT_FILENO);
 		close(cmd->outfile);
+		cmd->outfile = -1;
 	}
 	else if (pw != -1)
 		dup2(pw, STDOUT_FILENO);
@@ -34,30 +36,28 @@ static void	pipe_child_io(t_cmd *cmd, int prev, int pw)
 		close(pw);
 }
 
-void	no_path_exit(t_cmd *cmd)
-{
-	ft_putstr_fd("minishell: ", 2);
-	ft_putstr_fd(cmd->command_args[0], 2);
-	ft_putendl_fd(": command not found", 2);
-	exit(127);
-}
-
 static void	pipe_child(t_cmd *cmd, t_info *info, int prev, int *pw)
 {
 	char	*path;
 	char	**envp;
 
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-	close (pw[0]);
+	default_signals();
+	if (pw[0] != -1)
+		close(pw[0]);
 	pipe_child_io(cmd, prev, pw[1]);
+	close_other_fds(info->cmds_head, cmd);
 	if (!cmd->command_args || !cmd->command_args[0])
 		exit(0);
 	if (is_builtin(cmd->command_args[0]))
 		exit(exec_builtin(cmd, info, 1));
 	path = get_path(cmd->command_args[0], info->env);
 	if (!path)
-		no_path_exit(cmd);
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(cmd->command_args[0], 2);
+		ft_putendl_fd(": command not found", 2);
+		exit(127);
+	}
 	envp = env_to_arr(info->env);
 	execve(path, cmd->command_args, envp);
 	free_arr(envp);
@@ -127,16 +127,11 @@ int	execute_pipeline(t_cmd *cmds, t_info *info)
 	int		i;
 	int		prev;
 
-	n = 0;
-	cmd = cmds;
-	while (cmd)
-	{
-		n++;
-		cmd = cmd->next;
-	}
+	n = count_cmds(cmds);
 	pids = malloc(sizeof(pid_t) * n);
 	if (!pids)
 		return (perror("minishell"), 1);
+	info->pipe_pids = pids;
 	i = 0;
 	prev = -1;
 	cmd = cmds;

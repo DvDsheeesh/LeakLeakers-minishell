@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   built_in_exec.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:40:11 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 17:41:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 19:27:13 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	is_builtin(char *cmd)
 int	exec_builtin(t_cmd *cmd, t_info *info, int is_child)
 {
 	char	*n;
-	int	ret;
+	int		ret;
 
 	n = cmd->command_args[0];
 	if (ft_strncmp(n, "echo", 5) == 0)
@@ -47,8 +47,9 @@ int	exec_builtin(t_cmd *cmd, t_info *info, int is_child)
 		ret = ft_cd(cmd->command_args, info);
 	if (is_child)
 	{
+		free(info->pipe_pids);
+		free_cmds(info->cmds_head);
 		free_vars(info);
-		free_cmds(cmd);
 	}
 	return (ret);
 }

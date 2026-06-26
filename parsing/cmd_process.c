@@ -71,6 +71,7 @@ int	command_process(t_info *vars)
 	t_cmd	*cmd;
 
 	cmd = parsing_commands(vars);
+	vars->cmds_head = cmd;
 	if (open_redirections(cmd, vars))
 	{
 		free_cmds(cmd);

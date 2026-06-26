@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 17:45:25 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 19:26:41 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ typedef struct s_program_info
 	char	*label_arr;
 	char	**arg_arr;
 	int		exit_status;
+	t_cmd	*cmds_head;
+	pid_t	*pipe_pids;
 }	t_info;
 
 /* signal setup */
@@ -131,6 +133,8 @@ int		ft_unset(char **args, t_info *info);
 /* execution */
 int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
+void	close_other_fds(t_cmd *head, t_cmd *cur);
+int		count_cmds(t_cmd *cmd);
 int		exit_child(int status);
 
 /* dollar expansion (parse_input.c) */

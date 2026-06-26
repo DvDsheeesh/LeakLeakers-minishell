@@ -48,6 +48,8 @@ t_info	*vars_init(char *line, char **env)
 	vars->line = line;
 	vars->word = NULL;
 	vars->exit_status = 0;
+	vars->cmds_head = NULL;
+	vars->pipe_pids = NULL;
 	return (vars);
 }
 
