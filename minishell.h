@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 19:26:41 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 19:36:45 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void	reset_vars(t_info *vars);
 char	**add_arg_to_arr(char **arr, char **word,
 			int free_old, int free_word);
 char	*ms_extend(char *word, char c);
-int		wrong_format(int *i);
+int		wrong_format(t_info *vars);
 int		arr_len(char **arr);
 int		join_arg(char **word, char *line, int i, char end_char);
 int		join_arg_dq(char **word, char **line, t_info *vars, int i);

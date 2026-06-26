@@ -59,6 +59,9 @@ run: all
 vrun:
 	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --trace-children=yes ./minishell
 
+supp:
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --trace-children=yes --suppressions=readline.supp ./minishell
+
 rerun: re vrun
 
 .PHONY: all clean fclean re run vrun rerun
