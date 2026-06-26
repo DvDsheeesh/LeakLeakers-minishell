@@ -9,6 +9,7 @@ SRC =	signals/signals.c \
 		signals/signals_heredoc.c \
 		execution/utilz2.c \
 		execution/utilz.c \
+		execution/pipe_utilz.c \
 		execution/pipe.c \
 		execution/env_get_path.c \
 		execution/env_utils2.c \
