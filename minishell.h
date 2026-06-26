@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 10:56:26 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 17:45:25 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ t_cmd	*create_command_node(void);
 
 /* builtins */
 int		is_builtin(char *cmd);
-int		exec_builtin(t_cmd *cmd, t_info *info);
+int		exec_builtin(t_cmd *cmd, t_info *info, int is_child);
 int		ft_echo(char **args);
 int		ft_pwd(void);
 int		ft_env(t_env *env);

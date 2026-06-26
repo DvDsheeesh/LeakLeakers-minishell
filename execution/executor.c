@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/08 21:08:06 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/25 23:49:00 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 17:44:50 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@ static int	exec_builtin_redir(t_cmd *cmd, t_info *info)
 	int	ret;
 
 	if (cmd->infile == -1 && cmd->outfile == -1)
-		return (exec_builtin(cmd, info));
+		return (exec_builtin(cmd, info, 0));
 	saved[0] = dup(STDIN_FILENO);
 	saved[1] = dup(STDOUT_FILENO);
 	if (cmd->infile != -1)
 		dup2(cmd->infile, STDIN_FILENO);
 	if (cmd->outfile != -1)
 		dup2(cmd->outfile, STDOUT_FILENO);
-	ret = exec_builtin(cmd, info);
+	ret = exec_builtin(cmd, info, 0);
 	dup2(saved[0], STDIN_FILENO);
 	dup2(saved[1], STDOUT_FILENO);
 	close(saved[0]);

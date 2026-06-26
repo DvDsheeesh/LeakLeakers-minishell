@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilz2.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/26 08:36:37 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/26 10:29:33 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 16:05:31 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,11 @@ void	free_arr(char **arr)
 
 void	free_env(t_env *env)
 {
-	t_env	*tmp;
-
-	while (env)
-	{
-		tmp = env->next;
-		free(env->var);
-		free(env->value);
-		free(env);
-		env = tmp;
-	}
+	if (env->next)
+		free_env(env->next);
+	free(env->var);
+	free(env->value);
+	free(env);
 }
 
 static void	free_redirs(t_redir *redirs)

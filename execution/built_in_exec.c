@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   built_in_exec.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: halbit <halbit@student.42amman.com>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:40:11 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 00:05:58 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 17:41:11 by halbit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,22 +25,30 @@ int	is_builtin(char *cmd)
 	return (ft_strncmp(cmd, "cd", 3) == 0);
 }
 
-int	exec_builtin(t_cmd *cmd, t_info *info)
+int	exec_builtin(t_cmd *cmd, t_info *info, int is_child)
 {
 	char	*n;
+	int	ret;
 
 	n = cmd->command_args[0];
 	if (ft_strncmp(n, "echo", 5) == 0)
-		return (ft_echo(cmd->command_args));
-	if (ft_strncmp(n, "pwd", 4) == 0)
-		return (ft_pwd());
-	if (ft_strncmp(n, "env", 4) == 0)
-		return (ft_env(info->env));
-	if (ft_strncmp(n, "exit", 5) == 0)
-		return (ft_exit(cmd, info));
-	if (ft_strncmp(n, "export", 7) == 0)
-		return (ft_export(cmd->command_args, info));
-	if (ft_strncmp(n, "unset", 6) == 0)
-		return (ft_unset(cmd->command_args, info));
-	return (ft_cd(cmd->command_args, info));
+		ret = ft_echo(cmd->command_args);
+	else if (ft_strncmp(n, "pwd", 4) == 0)
+		ret = ft_pwd();
+	else if (ft_strncmp(n, "env", 4) == 0)
+		ret = ft_env(info->env);
+	else if (ft_strncmp(n, "exit", 5) == 0)
+		ret = ft_exit(cmd, info);
+	else if (ft_strncmp(n, "export", 7) == 0)
+		ret = ft_export(cmd->command_args, info);
+	else if (ft_strncmp(n, "unset", 6) == 0)
+		ret = ft_unset(cmd->command_args, info);
+	else
+		ret = ft_cd(cmd->command_args, info);
+	if (is_child)
+	{
+		free_vars(info);
+		free_cmds(cmd);
+	}
+	return (ret);
 }
