@@ -1,16 +1,17 @@
-NAME = minishell
-
 CC = cc
-CFLAGS = -g -Werror #-Wall -Wextra
+CFLAGS = -g -Werror -Wall -Wextra
+NAME = minishell
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 SRC =	signals/signals.c \
 		signals/signals_heredoc.c \
+		execution/utilz2.c \
 		execution/utilz.c \
 		execution/pipe.c \
 		execution/env_get_path.c \
+		execution/env_utils2.c \
 		execution/env_utils.c \
 		execution/built_in_exec.c \
 		execution/builtins.c \
@@ -20,11 +21,23 @@ SRC =	signals/signals.c \
 		execution/builtins_unset.c \
 		execution/executor.c \
 		execution/heredoc.c \
-		parsing/parse_input.c
+		parsing/cmd_utils.c \
+		parsing/cmd_process.c \
+		parsing/parse_utils.c \
+		parsing/split_words.c \
+		parsing/join_arg.c \
+		parsing/env.c \
+		parsing/dollaroze.c \
+		parsing/labels.c \
+		parsing/vars.c \
+		parsing/main.c
+
 
 OBJ = $(SRC:.c=.o)
 
-all: $(OBJ) $(LIBFT)
+all: $(NAME)
+
+$(NAME): $(OBJ) $(LIBFT)
 	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline
 
 $(LIBFT):
@@ -48,4 +61,4 @@ vrun:
 
 rerun: re vrun
 
-.PHONY: all rerun clean fclean re
+.PHONY: all clean fclean re run vrun rerun

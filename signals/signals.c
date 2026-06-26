@@ -6,13 +6,13 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 21:34:42 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/25 22:13:43 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 10:33:44 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	handle_sigint(int sig)
+static void	handle_sigint(int sig)
 {
 	(void)sig;
 	write(1, "\n", 1);

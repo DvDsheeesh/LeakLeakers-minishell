@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   env_get_path.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 21:00:17 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/22 21:55:11 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 10:25:58 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-char	*find_path_in_env(t_env *env)
+static char	*find_path_in_env(t_env *env)
 {
 	while (env)
 	{
@@ -36,7 +36,7 @@ static char	*make_full_path(char *dir, char *cmd)
 	return (full);
 }
 
-char	*search_in_paths(char **paths, char *cmd)
+static char	*search_in_paths(char **paths, char *cmd)
 {
 	char	*full_path;
 	int		i;

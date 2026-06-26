@@ -6,13 +6,13 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 22:05:44 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/24 11:02:29 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 10:24:14 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	unset_process(t_info *info, t_env *prev, t_env *cur)
+static void	unset_process(t_info *info, t_env *prev, t_env *cur)
 {
 	if (prev)
 		prev->next = cur->next;

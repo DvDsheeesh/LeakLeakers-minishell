@@ -6,13 +6,13 @@
 /*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/25 21:34:35 by melshata          #+#    #+#             */
-/*   Updated: 2026/06/25 21:48:09 by melshata         ###   ########.fr       */
+/*   Updated: 2026/06/26 10:33:25 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	sigint_heredoc(int sig)
+static void	sigint_heredoc(int sig)
 {
 	(void)sig;
 	write(1, "\n", 1);

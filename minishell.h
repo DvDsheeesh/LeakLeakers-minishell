@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halbit <halbit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: melshata <melshata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 19:53:56 by halbit            #+#    #+#             */
-/*   Updated: 2026/06/26 00:46:53 by halbit           ###   ########.fr       */
+/*   Updated: 2026/06/26 10:56:26 by melshata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,30 @@ void	default_signals(void);
 void	set_heredoc_sig(void);
 
 void	free_vars(t_info *vars);
-void	free_cmds(t_cmd *cmds);
+t_info	*vars_init(char *line, char **env);
+void	reset_vars(t_info *vars);
+
+/* parsing utils */
+char	**add_arg_to_arr(char **arr, char **word,
+			int free_old, int free_word);
+char	*ms_extend(char *word, char c);
+int		wrong_format(int *i);
+int		arr_len(char **arr);
+int		join_arg(char **word, char *line, int i, char end_char);
+int		join_arg_dq(char **word, char **line, t_info *vars, int i);
+char	**split_input_words(char *line, t_info *vars);
+char	*labelizing(t_info *vars);
+int		validate_label(t_info *vars);
+int		command_process(t_info *vars);
+
+/* env additional utils */
+int		is_valid_id(char *str);
+void	print_export_entry(char *var, char *value);
+int		env_count(t_env *env);
+char	**collect_env_field(t_env *env, int n, int is_var);
 
 /* env linked list */
-t_env	*env_copy(char **envp);
+t_env	*extract_env(char **env);
 void	free_env(t_env *env);
 char	**env_to_arr(t_env *env);
 char	*env_get(t_env *env, char *key);
@@ -88,14 +108,14 @@ int		env_set(t_info *info, char *key, char *val);
 
 /* path resolution */
 char	*get_path(char *cmd, t_env *env);
-char	*find_path_in_env(t_env *env);
-char	*search_in_paths(char **paths, char *cmd);
 
 /* redirections + heredoc */
 t_redir	*new_redir(t_redir_type type, char *file);
-void	free_redirs(t_redir *redirs);
 int		open_redirections(t_cmd *cmds, t_info *info);
 int		handle_heredoc(char *delim, t_info *info, t_cmd *cmd);
+
+t_cmd	*last_command(t_cmd *lst);
+t_cmd	*create_command_node(void);
 
 /* builtins */
 int		is_builtin(char *cmd);
@@ -109,7 +129,6 @@ int		ft_export(char **args, t_info *info);
 int		ft_unset(char **args, t_info *info);
 
 /* execution */
-t_cmd	*parse_line(char *line);
 int		execute_pipeline(t_cmd *cmds, t_info *info);
 int		execute(t_cmd *cmd, t_info *info);
 int		exit_child(int status);
@@ -120,6 +139,5 @@ int		dollar_of_truth(char **line, t_info *vars, int i);
 /* utilities */
 void	free_arr(char **arr);
 void	free_cmds(t_cmd *cmds);
-void	sort_str_arr(char **arr, int n);
 
 #endif
