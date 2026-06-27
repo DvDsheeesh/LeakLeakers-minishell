@@ -74,6 +74,7 @@ int	command_process(t_info *vars)
 	vars->cmds_head = cmd;
 	if (open_redirections(cmd, vars))
 	{
+		vars->exit_status = 1;
 		free_cmds(cmd);
 		return (1);
 	}
